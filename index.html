@@ -3,443 +3,850 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Simple Calendar</title>
+  <title>StudyPilot MVP</title>
   <style>
+    :root {
+      --bg: #0b1220;
+      --border: rgba(255,255,255,0.12);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.70);
+      --muted-2: rgba(255,255,255,0.55);
+      --brand: #2f80ed;
+      --brand-2: #64b5ff;
+      --danger: #ff5b5b;
+      --shadow: 0 18px 50px rgba(0,0,0,0.45);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
-      font-family: Arial, Helvetica, sans-serif;
       margin: 0;
-      background: #f4f6f8;
-      color: #111827;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(47,128,237,0.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 10%, rgba(100,181,255,0.20), transparent 60%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
     }
 
-    .wrap {
-      max-width: 950px;
-      margin: 30px auto;
-      padding: 0 16px 70px;
-    }
-
-    .card {
-      background: white;
-      border-radius: 14px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-      padding: 16px;
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(12, 18, 32, 0.72);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
     }
 
     .topbar {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 18px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
     }
 
-    .title {
-      font-size: 20px;
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: 0 10px 30px rgba(47,128,237,0.35);
+      display: grid;
+      place-items: center;
       font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #06121f;
+      flex: 0 0 auto;
+    }
+
+    .brand h1 {
+      font-size: 18px;
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    .brand p {
+      margin: 2px 0 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .pill {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      padding: 8px 10px;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 18px 16px 40px;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 980px) {
+      .wrap { grid-template-columns: 1fr; }
+      .pill { display: none; }
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .panel-header h2 {
+      font-size: 14px;
+      margin: 0;
       letter-spacing: 0.2px;
     }
 
-    .controls {
-      display: flex;
-      gap: 8px;
+    .panel-header .sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .panel-body { padding: 14px; }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
       align-items: center;
     }
 
-    button {
-      border: 0;
+    input[type="text"], textarea, select {
+      width: 100%;
       padding: 10px 12px;
-      border-radius: 10px;
-      background: #2563eb;
-      color: white;
-      cursor: pointer;
-      font-weight: 700;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.20);
+      color: var(--text);
+      outline: none;
     }
 
-    button:hover { filter: brightness(0.95); }
-    button.secondary { background: #111827; }
-    button.ghost {
-      background: #e5e7eb;
-      color: #111827;
+    input[type="file"] {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px dashed rgba(255,255,255,0.22);
+      background: rgba(0,0,0,0.18);
+      color: var(--muted);
+    }
+
+    textarea { min-height: 120px; resize: vertical; }
+
+    .btn {
+      border: 1px solid rgba(47,128,237,0.35);
+      background: linear-gradient(135deg, rgba(47,128,237,0.95), rgba(100,181,255,0.85));
+      color: #06121f;
       font-weight: 700;
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.06s ease, filter 0.2s ease;
+      user-select: none;
+    }
+
+    .btn:active { transform: translateY(1px) scale(0.99); }
+    .btn:hover { filter: brightness(1.05); }
+
+    .btn.secondary {
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-weight: 600;
+    }
+
+    .btn.ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .btn.danger {
+      background: rgba(255,91,91,0.12);
+      border: 1px solid rgba(255,91,91,0.35);
+      color: #ffd7d7;
+    }
+
+    .hint {
+      margin-top: 8px;
+      color: var(--muted-2);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 12px 0;
+    }
+
+    .tiny {
+      font-size: 11px;
+      color: var(--muted-2);
+    }
+
+    .folder-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .folder {
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .folder:hover { background: rgba(255,255,255,0.06); }
+
+    .folder.active {
+      border-color: rgba(100,181,255,0.55);
+      background: rgba(47,128,237,0.12);
+      box-shadow: 0 10px 30px rgba(47,128,237,0.15);
+    }
+
+    .folder .name {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .folder .name strong {
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .folder .name span {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .badge {
+      font-size: 12px;
+      color: rgba(255,255,255,0.86);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--border);
+      padding: 5px 9px;
+      border-radius: 999px;
+      flex: 0 0 auto;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .tab {
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .tab.active {
+      color: var(--text);
+      background: rgba(47,128,237,0.18);
+      border-color: rgba(100,181,255,0.45);
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 10px;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 14px;
     }
 
-    .dow {
-      text-align: center;
-      font-weight: 800;
-      color: #6b7280;
-      padding: 10px 6px;
-      border-radius: 10px;
-      background: #f9fafb;
+    .card {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      border-radius: var(--radius);
+      padding: 14px;
     }
 
-    .day {
-      min-height: 90px;
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      padding: 10px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      transition: transform 0.05s ease;
-    }
-
-    .day:hover { transform: translateY(-1px); }
-
-    .day.muted {
-      background: #fafafa;
-      color: #9ca3af;
-    }
-
-    .num {
-      font-weight: 900;
+    .card h3 {
+      margin: 0 0 6px 0;
       font-size: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
     }
 
-    .badge {
-      font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 999px;
-      background: #e0f2fe;
-      color: #0369a1;
-      font-weight: 800;
+    .card p {
+      margin: 0 0 12px 0;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.45;
     }
 
-    .event {
-      font-size: 12px;
-      background: #f3f4f6;
-      border-radius: 10px;
-      padding: 6px 8px;
-      line-height: 1.25;
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-    }
-
-    .footerHint {
+    .output {
       margin-top: 12px;
-      color: #6b7280;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(47,128,237,0.12);
+      border: 1px solid rgba(100,181,255,0.22);
+      color: rgba(255,255,255,0.88);
       font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap;
     }
 
-    /* Simple modal */
-    .modalBack {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.35);
+    .status {
       display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
     }
 
-    .modal {
-      width: 100%;
-      max-width: 520px;
-      background: white;
-      border-radius: 14px;
-      box-shadow: 0 18px 60px rgba(0,0,0,0.25);
-      padding: 16px;
-    }
+    .status.show { display: block; }
 
-    .modal h2 {
-      margin: 0 0 6px;
-      font-size: 18px;
-    }
-
-    .modal p {
-      margin: 0 0 12px;
-      color: #6b7280;
-      font-size: 13px;
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 90px;
-      resize: vertical;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      padding: 10px;
-      font-size: 14px;
-      outline: none;
-    }
-
-    .modalActions {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-    }
-
-    .leftActions, .rightActions {
-      display: flex;
-      gap: 8px;
+    footer {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 10px 16px 28px;
+      color: var(--muted-2);
+      font-size: 12px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
+
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">SP</div>
+        <div>
+          <h1>StudyPilot AI</h1>
+          <p>MVP Prototype · organize by folder → topic → items</p>
+        </div>
+      </div>
+      <div class="pill">🛡️ Academic-safe mode · explains, doesn’t solve</div>
+    </div>
+  </header>
+
   <div class="wrap">
-    <div class="card">
-      <div class="topbar">
-        <div class="title" id="monthTitle">Month YYYY</div>
-        <div class="controls">
-          <button class="ghost" id="prevBtn">◀ Prev</button>
-          <button class="ghost" id="todayBtn">Today</button>
-          <button class="ghost" id="nextBtn">Next ▶</button>
-          <button class="secondary" id="clearAllBtn">Clear All</button>
+    <aside class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>📁 Study Folders</h2>
+          <div class="sub">Subjects / Courses</div>
+        </div>
+        <button class="btn ghost" id="resetBtn" title="Reset demo data">Reset</button>
+      </div>
+      <div class="panel-body">
+        <div class="row">
+          <input id="folderName" type="text" placeholder="Add a folder (e.g., NET101, Java, Math)" />
+          <button class="btn" id="addFolderBtn">Add</button>
+        </div>
+        <div class="hint">Folders are your big buckets. Inside each folder, add <b>Topics</b> (chapters). Every output will be saved under your chosen topic.</div>
+
+        <div class="divider"></div>
+
+        <div id="folderList" class="folder-list"></div>
+
+        <div class="divider"></div>
+        <div class="tiny">Saved locally in your browser (localStorage). No accounts yet.</div>
+      </div>
+    </aside>
+
+    <main class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 id="activeFolderTitle">📚 Select a folder</h2>
+          <div class="sub" id="activeFolderSub">Then create a topic to start organizing your work.</div>
+        </div>
+        <div class="tabs" role="tablist">
+          <div class="tab active" data-tab="assignment">📄 Assignment Explainer</div>
+          <div class="tab" data-tab="notes">📝 Lecture-to-Notes</div>
+          <div class="tab" data-tab="library">🗂️ Topic Library</div>
         </div>
       </div>
 
-      <div class="grid" id="dowRow"></div>
-      <div style="height:10px"></div>
-      <div class="grid" id="calendarGrid"></div>
+      <div class="panel-body">
+        <div class="card" id="topicCard">
+          <h3>🎯 Topic (inside this folder)</h3>
+          <p>Create topics like: <i>Subnetting</i>, <i>VLANs</i>, <i>Inheritance</i>, <i>SQL Joins</i>. Everything you generate will be saved under the selected topic.</p>
+          <div class="row">
+            <input id="topicName" type="text" placeholder="Add a topic (e.g., Subnetting / OOP / ERD)" />
+            <button class="btn" id="addTopicBtn">Add</button>
+          </div>
+          <div style="margin-top:10px; display:grid; gap:10px;">
+            <select id="topicSelect">
+              <option value="">Select a topic…</option>
+            </select>
+            <div class="hint" id="topicHint">Pick a folder + create a topic to unlock saving.</div>
+          </div>
+        </div>
 
-      <div class="footerHint">
-        Click any day to add/edit an event. (Saved locally in your browser.)
+        <div class="grid" id="tab-assignment">
+          <div class="card">
+            <h3>📄 Assignment Explainer</h3>
+            <p>Upload your assignment and get a clear breakdown of what is required. This prototype returns a demo output — later we’ll replace it with real AI.</p>
+
+            <input id="assignmentFile" type="file" accept=".pdf,.png,.jpg,.jpeg" />
+            <button class="btn" id="explainBtn">Explain Assignment</button>
+
+            <div class="status" id="assignStatus">Analyzing…</div>
+            <div class="output" id="assignmentOutput" style="display:none;"></div>
+
+            <div class="hint">✅ Tip: Choose the correct <b>Folder</b> and <b>Topic</b> first so this result gets saved in your Topic Library.</div>
+          </div>
+        </div>
+
+        <div class="grid" id="tab-notes" style="display:none;">
+          <div class="card">
+            <h3>📝 Lecture-to-Notes</h3>
+            <p>Paste lecture content (or add slide text). This prototype generates demo notes and saves them under your selected topic.</p>
+            <textarea id="lectureText" placeholder="Paste lecture content here…"></textarea>
+
+            <button class="btn" id="notesBtn">Generate Notes</button>
+
+            <div class="status" id="notesStatus">Summarizing…</div>
+            <div class="output" id="notesOutput" style="display:none;"></div>
+
+            <div class="hint">Later: slide upload + PDF text extraction + real AI summaries.</div>
+          </div>
+        </div>
+
+        <div class="grid" id="tab-library" style="display:none;">
+          <div class="card">
+            <h3>🗂️ Topic Library</h3>
+            <p>Everything you generate gets saved here under <b>Folder → Topic</b>. This is your “study folder” system.</p>
+
+            <div id="libraryView" class="output">Select a folder + topic to view saved items.</div>
+
+            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn secondary" id="refreshLibraryBtn">Refresh</button>
+              <button class="btn danger" id="clearTopicBtn">Clear Topic Items</button>
+            </div>
+
+            <div class="hint">This data is stored locally in your browser for now.</div>
+          </div>
+        </div>
       </div>
-    </div>
+    </main>
   </div>
 
-  <!-- Modal -->
-  <div class="modalBack" id="modalBack">
-    <div class="modal">
-      <h2 id="modalTitle">Event</h2>
-      <p id="modalSubtitle">YYYY-MM-DD</p>
-      <textarea id="eventText" placeholder="Type your event note here..."></textarea>
-      <div class="modalActions">
-        <div class="leftActions">
-          <button class="ghost" id="closeBtn">Close</button>
-        </div>
-        <div class="rightActions">
-          <button class="ghost" id="deleteBtn">Delete</button>
-          <button id="saveBtn">Save</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <footer>
+    © 2026 StudyPilot AI — MVP Demo · Next step: replace demo outputs with real AI + file text extraction.
+  </footer>
 
   <script>
-    // ---- Simple Calendar with localStorage events ----
+    const STORAGE_KEY = 'studypilot_mvp_data_v1';
+    const $ = (id) => document.getElementById(id);
 
-    const dowNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-    const monthNames = [
-      "January","February","March","April","May","June",
-      "July","August","September","October","November","December"
-    ];
-
-    const monthTitle = document.getElementById("monthTitle");
-    const dowRow = document.getElementById("dowRow");
-    const grid = document.getElementById("calendarGrid");
-
-    const prevBtn = document.getElementById("prevBtn");
-    const nextBtn = document.getElementById("nextBtn");
-    const todayBtn = document.getElementById("todayBtn");
-    const clearAllBtn = document.getElementById("clearAllBtn");
-
-    const modalBack = document.getElementById("modalBack");
-    const modalTitle = document.getElementById("modalTitle");
-    const modalSubtitle = document.getElementById("modalSubtitle");
-    const eventText = document.getElementById("eventText");
-    const closeBtn = document.getElementById("closeBtn");
-    const saveBtn = document.getElementById("saveBtn");
-    const deleteBtn = document.getElementById("deleteBtn");
-
-    // current view
-    let viewDate = new Date();
-    viewDate.setDate(1);
-
-    // modal selected date key
-    let activeKey = null;
-
-    function pad2(n){ return String(n).padStart(2, "0"); }
-    function keyFromDate(d){
-      return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+    function uid() {
+      return Math.random().toString(16).slice(2) + Date.now().toString(16);
     }
 
-    function loadEvents(){
-      try {
-        return JSON.parse(localStorage.getItem("simple_calendar_events") || "{}");
-      } catch {
-        return {};
+    function loadData() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        const demo = {
+          folders: [
+            { id: uid(), name: 'NET101', topics: [
+              { id: uid(), name: 'Subnetting', items: [] },
+              { id: uid(), name: 'VLANs', items: [] }
+            ]},
+            { id: uid(), name: 'Java', topics: [
+              { id: uid(), name: 'OOP Basics', items: [] },
+              { id: uid(), name: 'Inheritance', items: [] }
+            ]}
+          ],
+          activeFolderId: null,
+          activeTopicId: null
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(demo));
+        return demo;
       }
-    }
-    function saveEvents(obj){
-      localStorage.setItem("simple_calendar_events", JSON.stringify(obj));
-    }
-
-    function openModal(dateObj){
-      const k = keyFromDate(dateObj);
-      activeKey = k;
-
-      const events = loadEvents();
-      const text = events[k] || "";
-
-      modalTitle.textContent = "Event / Note";
-      modalSubtitle.textContent = k;
-      eventText.value = text;
-
-      modalBack.style.display = "flex";
-      eventText.focus();
-    }
-
-    function closeModal(){
-      modalBack.style.display = "none";
-      activeKey = null;
-      eventText.value = "";
-    }
-
-    function buildDOW(){
-      dowRow.innerHTML = "";
-      for (const name of dowNames){
-        const el = document.createElement("div");
-        el.className = "dow";
-        el.textContent = name;
-        dowRow.appendChild(el);
+      try { return JSON.parse(raw); }
+      catch {
+        localStorage.removeItem(STORAGE_KEY);
+        return loadData();
       }
     }
 
-    function render(){
-      const year = viewDate.getFullYear();
-      const month = viewDate.getMonth();
+    function saveData(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
 
-      monthTitle.textContent = `${monthNames[month]} ${year}`;
-      grid.innerHTML = "";
+    function getActiveFolder(data) {
+      return data.folders.find(f => f.id === data.activeFolderId) || null;
+    }
 
-      const events = loadEvents();
+    function getActiveTopic(folder, data) {
+      if (!folder) return null;
+      return folder.topics.find(t => t.id === data.activeTopicId) || null;
+    }
 
-      const firstDayIndex = new Date(year, month, 1).getDay();        // 0..6
-      const daysInMonth = new Date(year, month + 1, 0).getDate();      // 28..31
-      const daysInPrevMonth = new Date(year, month, 0).getDate();      // last day of prev month
+    function setActiveFolder(id) {
+      const data = loadData();
+      data.activeFolderId = id;
+      const folder = data.folders.find(f => f.id === id);
+      data.activeTopicId = folder && folder.topics.length ? folder.topics[0].id : null;
+      saveData(data);
+      render();
+    }
 
-      // We’ll render 6 weeks (42 cells) to keep layout stable.
-      const totalCells = 42;
+    function setActiveTopic(id) {
+      const data = loadData();
+      data.activeTopicId = id;
+      saveData(data);
+      renderTopicHint();
+    }
 
-      for (let i = 0; i < totalCells; i++){
-        const cell = document.createElement("div");
-        cell.className = "day";
+    function ensureSelectionOrWarn() {
+      const data = loadData();
+      const folder = getActiveFolder(data);
+      const topic = getActiveTopic(folder, data);
+      if (!folder) { alert('Pick a folder first (left sidebar).'); return null; }
+      if (!topic) { alert('Create/select a topic first so we can save your output.'); return null; }
+      return { data, folder, topic };
+    }
 
-        // Determine which date this cell is
-        let cellDate;
+    function renderFolders() {
+      const data = loadData();
+      const list = $('folderList');
+      list.innerHTML = '';
 
-        if (i < firstDayIndex){
-          // previous month trailing days
-          const dayNum = daysInPrevMonth - (firstDayIndex - 1 - i);
-          cell.classList.add("muted");
-          cellDate = new Date(year, month - 1, dayNum);
-        } else if (i >= firstDayIndex + daysInMonth){
-          // next month leading days
-          const dayNum = i - (firstDayIndex + daysInMonth) + 1;
-          cell.classList.add("muted");
-          cellDate = new Date(year, month + 1, dayNum);
-        } else {
-          // current month
-          const dayNum = i - firstDayIndex + 1;
-          cellDate = new Date(year, month, dayNum);
-        }
+      data.folders.forEach(folder => {
+        const div = document.createElement('div');
+        div.className = 'folder' + (folder.id === data.activeFolderId ? ' active' : '');
+        div.onclick = () => setActiveFolder(folder.id);
 
-        const k = keyFromDate(cellDate);
-        const hasEvent = (events[k] && events[k].trim().length > 0);
+        const left = document.createElement('div');
+        left.className = 'name';
 
-        const top = document.createElement("div");
-        top.className = "num";
+        const strong = document.createElement('strong');
+        strong.textContent = folder.name;
 
-        const left = document.createElement("span");
-        left.textContent = cellDate.getDate();
+        const span = document.createElement('span');
+        span.textContent = folder.topics.length ? (folder.topics.length + ' topics') : 'No topics yet';
 
-        top.appendChild(left);
+        left.appendChild(strong);
+        left.appendChild(span);
 
-        if (hasEvent){
-          const badge = document.createElement("span");
-          badge.className = "badge";
-          badge.textContent = "Event";
-          top.appendChild(badge);
-        }
+        const badge = document.createElement('div');
+        badge.className = 'badge';
+        const itemCount = folder.topics.reduce((acc, t) => acc + ((t.items || []).length), 0);
+        badge.textContent = String(itemCount);
 
-        cell.appendChild(top);
+        div.appendChild(left);
+        div.appendChild(badge);
+        list.appendChild(div);
+      });
 
-        if (hasEvent){
-          const preview = document.createElement("div");
-          preview.className = "event";
-          preview.textContent = events[k];
-          cell.appendChild(preview);
-        }
-
-        cell.addEventListener("click", () => openModal(cellDate));
-        grid.appendChild(cell);
+      if (!data.activeFolderId && data.folders.length) {
+        data.activeFolderId = data.folders[0].id;
+        data.activeTopicId = data.folders[0].topics.length ? data.folders[0].topics[0].id : null;
+        saveData(data);
       }
     }
 
-    // Buttons
-    prevBtn.addEventListener("click", () => {
-      viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1);
-      render();
-    });
+    function renderTopics() {
+      const data = loadData();
+      const folder = getActiveFolder(data);
+      const select = $('topicSelect');
+      select.innerHTML = '<option value="">Select a topic…</option>';
 
-    nextBtn.addEventListener("click", () => {
-      viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1);
-      render();
-    });
-
-    todayBtn.addEventListener("click", () => {
-      const now = new Date();
-      viewDate = new Date(now.getFullYear(), now.getMonth(), 1);
-      render();
-    });
-
-    clearAllBtn.addEventListener("click", () => {
-      const ok = confirm("Clear ALL saved events? (This cannot be undone)");
-      if (!ok) return;
-      localStorage.removeItem("simple_calendar_events");
-      render();
-    });
-
-    // Modal actions
-    closeBtn.addEventListener("click", closeModal);
-    modalBack.addEventListener("click", (e) => {
-      if (e.target === modalBack) closeModal();
-    });
-
-    saveBtn.addEventListener("click", () => {
-      if (!activeKey) return;
-      const events = loadEvents();
-      const text = eventText.value.trim();
-
-      if (text.length === 0) {
-        delete events[activeKey];
-      } else {
-        events[activeKey] = text;
+      if (!folder) {
+        $('activeFolderTitle').textContent = '📚 Select a folder';
+        $('activeFolderSub').textContent = 'Then create a topic to start organizing your work.';
+        return;
       }
-      saveEvents(events);
-      closeModal();
-      render();
-    });
 
-    deleteBtn.addEventListener("click", () => {
-      if (!activeKey) return;
-      const events = loadEvents();
-      delete events[activeKey];
-      saveEvents(events);
-      closeModal();
-      render();
-    });
+      $('activeFolderTitle').textContent = '📚 ' + folder.name;
+      $('activeFolderSub').textContent = 'Folder → Topics → Saved items (assignments & notes)';
 
-    // Init
-    buildDOW();
-    render();
-  </script>
-</body>
-</html>
+      folder.topics.forEach(topic => {
+        const opt = document.createElement('option');
+        opt.value = topic.id;
+        opt.textContent = topic.name + ' (' + ((topic.items || []).length) + ')';
+        select.appendChild(opt);
+      });
+
+      if (data.activeTopicId) select.value = data.activeTopicId;
+      select.onchange = (e) => setActiveTopic(e.target.value);
+    }
+
+    function renderTopicHint() {
+      const data = loadData();
+      const folder = getActiveFolder(data);
+      const topic = getActiveTopic(folder, data);
+      const hint = $('topicHint');
+
+      if (!folder) { hint.textContent = 'Pick a folder on the left.'; return; }
+      if (!topic) { hint.textContent = 'Create a topic (chapter) so we can save your outputs.'; return; }
+      hint.textContent = 'Saving to: ' + folder.name + ' → ' + topic.name;
+    }
+
+    function renderLibrary() {
+      const data = loadData();
+      const folder = getActiveFolder(data);
+      const topic = getActiveTopic(folder, data);
+      const view = $('libraryView');
+
+      if (!folder || !topic) {
+        view.textContent = 'Select a folder + topic to view saved items.';
+        return;
+      }
+
+      const items = (topic.items || []).slice().reverse();
+      if (!items.length) {
+        view.textContent = 'No saved items yet in ' + folder.name + ' → ' + topic.name + '. Generate an Assignment explanation or Notes first.';
+        return;
+      }
+
+      const lines = [];
+      lines.push(folder.name + ' → ' + topic.name);
+      lines.push('');
+
+      items.forEach((it, idx) => {
+        const date = new Date(it.ts).toLocaleString();
+        lines.push((idx + 1) + '. [' + it.type + '] ' + it.title);
+        lines.push('   ' + date);
+
+        const indented = (it.content || '').split('\n').join('\n   ');
+        lines.push('   ' + indented);
+        lines.push('');
+      });
+
+      view.textContent = lines.join('\n');
+    }
+
+    function renderTabs() {
+      const tabs = document.querySelectorAll('.tab');
+      const map = {
+        assignment: $('tab-assignment'),
+        notes: $('tab-notes'),
+        library: $('tab-library')
+      };
+
+      tabs.forEach(t => {
+        t.onclick = () => {
+          tabs.forEach(x => x.classList.remove('active'));
+          t.classList.add('active');
+
+          Object.keys(map).forEach(k => { map[k].style.display = 'none'; });
+          const key = t.getAttribute('data-tab');
+          map[key].style.display = 'block';
+
+          if (key === 'library') renderLibrary();
+        };
+      });
+    }
+
+    function render() {
+      renderFolders();
+      renderTopics();
+      renderTopicHint();
+      renderLibrary();
+    }
+
+    $('addFolderBtn').onclick = () => {
+      const name = $('folderName').value.trim();
+      if (!name) return;
+
+      const data = loadData();
+      data.folders.push({ id: uid(), name: name, topics: [] });
+      data.activeFolderId = data.folders[data.folders.length - 1].id;
+      data.activeTopicId = null;
+      saveData(data);
+
+      $('folderName').value = '';
+      render();
+    };
+
+    $('addTopicBtn').onclick = () => {
+      const name = $('topicName').value.trim();
+      if (!name) return;
+
+      const data = loadData();
+      const folder = getActiveFolder(data);
+      if (!folder) { alert('Pick a folder first.'); return; }
+
+      const newTopic = { id: uid(), name: name, items: [] };
+      folder.topics.push(newTopic);
+      data.activeTopicId = newTopic.id;
+      saveData(data);
+
+      $('topicName').value = '';
+      render();
+    };
+
+    function fakeDelay(ms) {
+      return new Promise(res => setTimeout(res, ms));
+    }
+
+    function setStatus(el, show, text) {
+      el.textContent = text;
+      el.classList.toggle('show', show);
+    }
+
+    function showOutput(el, text) {
+      el.style.display = 'block';
+      el.textContent = text;
+    }
+
+    function saveItem(type, title, content) {
+      const selected = ensureSelectionOrWarn();
+      if (!selected) return false;
+
+      const data = selected.data;
+      const topic = selected.topic;
+
+      topic.items = topic.items || [];
+      topic.items.push({ type: type, title: title, content: content, ts: Date.now() });
+      saveData(data);
+      return true;
+    }
+
+    function normalizePreview(s) {
+      let out = s.replaceAll('\n', ' ').replaceAll('\t', ' ');
+      while (out.indexOf('  ') !== -1) out = out.replaceAll('  ', ' ');
+      return out.trim();
+    }
+
+    $('explainBtn').onclick = async () => {
+      const selected = ensureSelectionOrWarn();
+      if (!selected) return;
+
+      const status = $('assignStatus');
+      const out = $('assignmentOutput');
+
+      setStatus(status, true, 'Analyzing…');
+      out.style.display = 'none';
+
+      await fakeDelay(900);
+
+      const file = $('assignmentFile').files[0];
+      const fileName = file ? file.name : 'your assignment';
+
+      const demo = [
+        'Assignment Breakdown (demo): ' + fileName,
+        '',
+        '1) What you are being asked to deliver:',
+        '   - Identify the required outputs (report / code / diagrams / screenshots).',
+        '   - Note formatting rules (PDF, naming, due date, submission platform).',
+        '',
+        '2) Checklist before submitting:',
+        '   - Did you answer every bullet in the prompt?',
+        '   - Did you follow the rubric headings exactly?',
+        '   - Did you include screenshots / references where required?',
+        '',
+        '3) Common mark-loss traps:',
+        '   - Missing one tiny requirement (file name, diagram labels).',
+        '   - Wrong assumptions (e.g., subnet mask / constraints).',
+        '   - No explanation of steps (even if the final answer is correct).'
+      ].join('\n');
+
+      setStatus(status, false, '');
+      showOutput(out, demo);
+
+      saveItem('Assignment', 'Explained: ' + fileName, demo);
+      render();
+    };
+
+    $('notesBtn').onclick = async () => {
+      const selected = ensureSelectionOrWarn();
+      if (!selected) return;
+
+      const status = $('notesStatus');
+      const out = $('notesOutput');
+
+      setStatus(status, true, 'Summarizing…');
+      out.style.display = 'none';
+
+      await fakeDelay(900);
+
+      const text = $('lectureText').value.trim();
+      const preview = text ? normalizePreview(text.slice(0, 120)) : 'lecture content';
+      const more = text.length > 120 ? '…' : '';
+
+      const demo = [
+        'Lecture Notes (demo):',
+        '',
+        'Key ideas:',
+        '• Main concept summary in simple language',
+        '• Definitions + 1 example each',
+        '• What professors love asking on exams',
+        '',
+        'Quick recall:',
+        '• 3 bullet flashcards you can memorize',
+        '• 2 common mistakes to avoid',
+        '',
+        'Input preview: "' + preview + more + '"'
+      ].join('\n');
+
+      setStatus(status, false, '');
+      showOutput(out, demo);
+
+      saveItem('Notes', 'Generated notes', demo);
+      render();
+    };
+
+    $('refreshLibraryBtn').onclick = () => renderLibrary();
+
+    $('clearTopicBtn').onclick = () => {
+      const data = loadData();
+      const folder = getActiveFolder(data);
+      const topic = getActiveTopic(folder, data);
+      if (!folder || !topic) { alert('Select a folder and topic first.'); return; }
+
+      const ok = confirm('Clear all items in ' + folder.name + ' → ' + topic.name + '?');
