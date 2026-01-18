@@ -236,6 +236,57 @@
       margin-top: 12px;
     }
 
+    .recent-list {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .recent-item {
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      cursor: pointer;
+      transition: background 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .recent-item:hover { background: rgba(255,255,255,0.06); }
+
+    .recent-item .meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .recent-item .meta strong {
+      font-size: 12.5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .recent-item .meta span {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .recent-item .when {
+      font-size: 11px;
+      color: var(--muted-2);
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+
     .folder {
       padding: 10px 12px;
       border-radius: 14px;
@@ -289,28 +340,77 @@
       flex: 0 0 auto;
     }
 
-    .tabs {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
+    .icon-btn {
+      background: rgba(0,0,0,0.0);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 6px 8px;
+      cursor: pointer;
+      font-weight: 800;
+      line-height: 1;
+      user-select: none;
     }
 
-    .tab {
-      padding: 8px 10px;
-      border-radius: 999px;
+    .icon-btn:hover { background: rgba(255,255,255,0.06); }
+
+    .icon-btn.danger {
+      border-color: rgba(255,91,91,0.35);
+      color: #ffd7d7;
+      background: rgba(255,91,91,0.10);
+    }
+
+
+    .main-split {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .subnav {
+      display: grid;
+      gap: 12px;
+      position: sticky;
+      top: 86px;
+    }
+
+    .subnav-tabs {
+      display: grid;
+      gap: 8px;
+    }
+
+    .navtab {
+      padding: 10px 12px;
+      border-radius: 14px;
       border: 1px solid var(--border);
-      background: rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.04);
       color: var(--muted);
       cursor: pointer;
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 12.5px;
+      font-weight: 700;
+      user-select: none;
+      transition: background 0.15s ease;
     }
 
-    .tab.active {
+    .navtab:hover { background: rgba(255,255,255,0.06); }
+
+    .navtab.active {
       color: var(--text);
       background: rgba(47,128,237,0.18);
       border-color: rgba(100,181,255,0.45);
+      box-shadow: 0 10px 30px rgba(47,128,237,0.12);
+    }
+
+    .subview {
+      min-width: 0;
+    }
+
+    @media (max-width: 980px) {
+      .main-split { grid-template-columns: 1fr; }
+      .subnav { position: relative; top: auto; }
+      .subnav-tabs { grid-template-columns: repeat(3, 1fr); }
+      .navtab { text-align: center; }
     }
 
     .grid {
@@ -404,11 +504,19 @@
           <input id="folderName" type="text" placeholder="Add a folder (e.g., NET101, Java, Math)" />
           <button class="btn" id="addFolderBtn">Add</button>
         </div>
-        <div class="hint">Folders are your big buckets. Inside each folder, add <b>Topics</b> (chapters). Every output will be saved under your chosen topic.</div>
+        <div class="hint">Folders are your big buckets. Inside each folder, add a <b>Main Topic</b> + <b>Subtopic</b>. Every output will be saved under your chosen subtopic.</div>
 
         <div class="divider"></div>
 
         <div id="folderList" class="folder-list"></div>
+
+        <div class="divider"></div>
+
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <div style="font-size:12px; color: var(--muted); font-weight:800; letter-spacing:0.2px;">🕘 Recent</div>
+          <button class="btn ghost" id="clearRecentBtn" title="Clear recent list" style="padding:6px 10px; border-radius:999px; font-size:12px;">Clear</button>
+        </div>
+        <div id="recentList" class="recent-list"></div>
 
         <div class="divider"></div>
         <div class="tiny">Saved locally in your browser (localStorage). No accounts yet.</div>
@@ -421,73 +529,88 @@
           <h2 id="activeFolderTitle">📚 Select a folder</h2>
           <div class="sub" id="activeFolderSub">Then create a topic to start organizing your work.</div>
         </div>
-        <div class="tabs" role="tablist">
-          <div class="tab active" data-tab="assignment">📄 Assignment Explainer</div>
-          <div class="tab" data-tab="notes">📝 Lecture-to-Notes</div>
-          <div class="tab" data-tab="library">🗂️ Topic Library</div>
-        </div>
       </div>
 
       <div class="panel-body">
-        <div class="card" id="topicCard">
-          <h3>🎯 Topic (inside this folder)</h3>
-          <p>Create topics like: <i>Subnetting</i>, <i>VLANs</i>, <i>Inheritance</i>, <i>SQL Joins</i>. Everything you generate will be saved under the selected topic.</p>
-          <div class="row">
-            <input id="topicName" type="text" placeholder="Add a topic (e.g., Subnetting / OOP / ERD)" />
-            <button class="btn" id="addTopicBtn">Add</button>
-          </div>
-          <div style="margin-top:10px; display:grid; gap:10px;">
-            <select id="topicSelect">
-              <option value="">Select a topic…</option>
-            </select>
-            <div class="hint" id="topicHint">Pick a folder + create a topic to unlock saving.</div>
-          </div>
-        </div>
-
-        <div class="grid" id="tab-assignment">
-          <div class="card">
-            <h3>📄 Assignment Explainer</h3>
-            <p>Upload your assignment and get a clear breakdown of what is required. This prototype returns a demo output — later we’ll replace it with real AI.</p>
-
-            <input id="assignmentFile" type="file" accept=".pdf,.png,.jpg,.jpeg" />
-            <button class="btn" id="explainBtn">Explain Assignment</button>
-
-            <div class="status" id="assignStatus">Analyzing…</div>
-            <div class="output" id="assignmentOutput" style="display:none;"></div>
-
-            <div class="hint">✅ Tip: Choose the correct <b>Folder</b> and <b>Topic</b> first so this result gets saved in your Topic Library.</div>
-          </div>
-        </div>
-
-        <div class="grid" id="tab-notes" style="display:none;">
-          <div class="card">
-            <h3>📝 Lecture-to-Notes</h3>
-            <p>Paste lecture content (or add slide text). This prototype generates demo notes and saves them under your selected topic.</p>
-            <textarea id="lectureText" placeholder="Paste lecture content here…"></textarea>
-
-            <button class="btn" id="notesBtn">Generate Notes</button>
-
-            <div class="status" id="notesStatus">Summarizing…</div>
-            <div class="output" id="notesOutput" style="display:none;"></div>
-
-            <div class="hint">Later: slide upload + PDF text extraction + real AI summaries.</div>
-          </div>
-        </div>
-
-        <div class="grid" id="tab-library" style="display:none;">
-          <div class="card">
-            <h3>🗂️ Topic Library</h3>
-            <p>Everything you generate gets saved here under <b>Folder → Topic</b>. This is your “study folder” system.</p>
-
-            <div id="libraryView" class="output">Select a folder + topic to view saved items.</div>
-
-            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
-              <button class="btn secondary" id="refreshLibraryBtn">Refresh</button>
-              <button class="btn danger" id="clearTopicBtn">Clear Topic Items</button>
+        <div class="main-split">
+          <nav class="subnav">
+            <div class="card" id="topicCard" style="margin:0;">
+              <h3>🎯 Topic (inside this folder)</h3>
+              <p>Create a <b>Main Topic</b> (chapter) and then add <b>Subtopics</b>. Everything you generate will be saved under the selected subtopic.</p>
+              <div style="display:grid; gap:10px;">
+                <input id="groupName" type="text" placeholder="Main topic (e.g., Networking / OOP / Databases)" />
+                <div class="row">
+                  <input id="topicName" type="text" placeholder="Subtopic (e.g., Subnetting / Inheritance / SQL Joins)" />
+                  <button class="btn" id="addTopicBtn">Add</button>
+                </div>
+              </div>
+              <div style="margin-top:10px; display:grid; gap:10px;">
+                <div class="row">
+                  <select id="topicSelect">
+                    <option value="">Select a subtopic…</option>
+                  </select>
+                  <button class="btn danger" id="deleteTopicBtn" title="Delete selected subtopic">Delete</button>
+                </div>
+                <div class="hint" id="topicHint">Pick a folder + create a topic to unlock saving.</div>
+              </div>
             </div>
 
-            <div class="hint">This data is stored locally in your browser for now.</div>
-          </div>
+            <div class="subnav-tabs" role="tablist" aria-label="Tools">
+              <div class="navtab active" data-tab="assignment">📄 Assignment</div>
+              <div class="navtab" data-tab="notes">📝 Notes</div>
+              <div class="navtab" data-tab="library">🗂️ Library</div>
+            </div>
+
+            <div class="hint" style="margin-top:10px;">Tip: generate something → it appears in Library. Offline mode works without internet.</div>
+          </nav>
+
+          <section class="subview">
+            <div class="grid" id="tab-assignment">
+              <div class="card">
+                <h3>📄 Assignment Explainer</h3>
+                <p>Upload your assignment and get a clean checklist + breakdown. If you paste instructions into the Notes box, it becomes more tailored (even offline).</p>
+
+                <input id="assignmentFile" type="file" accept=".pdf,.png,.jpg,.jpeg" />
+                <button class="btn" id="explainBtn">Explain Assignment</button>
+
+                <div class="status" id="assignStatus">Analyzing…</div>
+                <div class="output" id="assignmentOutput" style="display:none;"></div>
+
+                <div class="hint">✅ Pick the correct <b>Folder</b> and <b>Topic</b> first so this result gets saved in your Library.</div>
+              </div>
+            </div>
+
+            <div class="grid" id="tab-notes" style="display:none;">
+              <div class="card">
+                <h3>📝 Lecture-to-Notes</h3>
+                <p>Paste lecture content (or assignment instructions). Offline mode will format notes and create quick recall prompts.</p>
+                <textarea id="lectureText" placeholder="Paste lecture content here…"></textarea>
+
+                <button class="btn" id="notesBtn">Generate Notes</button>
+
+                <div class="status" id="notesStatus">Summarizing…</div>
+                <div class="output" id="notesOutput" style="display:none;"></div>
+
+                <div class="hint">Later: PDF text extraction + real AI (optional).</div>
+              </div>
+            </div>
+
+            <div class="grid" id="tab-library" style="display:none;">
+              <div class="card">
+                <h3>🗂️ Topic Library</h3>
+                <p>Everything you generate gets saved here under <b>Folder → Topic</b>. This is your study archive.</p>
+
+                <div id="libraryView" class="output">Select a folder + topic to view saved items.</div>
+
+                <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+                  <button class="btn secondary" id="refreshLibraryBtn">Refresh</button>
+                  <button class="btn danger" id="clearTopicBtn">Clear Topic Items</button>
+                </div>
+
+                <div class="hint">This data is stored locally in your browser for now.</div>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
     </main>
@@ -500,6 +623,7 @@
   <script>
     const STORAGE_KEY = 'studypilot_mvp_data_v1';
     const $ = (id) => document.getElementById(id);
+    const RECENT_KEY = 'studypilot_recent_v1';
 
     // ===== AI / Offline Mode (offline works without internet) =====
     const AI_STATE_KEY = 'studypilot_ai_state_v1';
@@ -643,7 +767,19 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(demo));
         return demo;
       }
-      try { return JSON.parse(raw); }
+      try {
+        const parsed = JSON.parse(raw);
+        // Migration: ensure topic.group exists
+        let changed = false;
+        (parsed.folders || []).forEach(f => {
+          (f.topics || []).forEach(t => {
+            if (!t.group) { t.group = 'General'; changed = true; }
+            if (!Array.isArray(t.items)) t.items = [];
+          });
+        });
+        if (changed) localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+        return parsed;
+      }
       catch {
         localStorage.removeItem(STORAGE_KEY);
         return loadData();
@@ -668,6 +804,42 @@
       data.activeFolderId = id;
       const folder = data.folders.find(f => f.id === id);
       data.activeTopicId = folder && folder.topics.length ? folder.topics[0].id : null;
+      saveData(data);
+      render();
+    }
+
+    function deleteFolder(folderId) {
+      const data = loadData();
+      const folder = data.folders.find(f => f.id === folderId);
+      if (!folder) return;
+
+      const ok = confirm('Delete folder "' + folder.name + '" and ALL its topics/items?');
+      if (!ok) return;
+
+      data.folders = data.folders.filter(f => f.id !== folderId);
+
+      // Re-pick active folder/topic
+      if (data.activeFolderId === folderId) {
+        data.activeFolderId = data.folders.length ? data.folders[0].id : null;
+        const af = data.activeFolderId ? data.folders.find(f => f.id === data.activeFolderId) : null;
+        data.activeTopicId = (af && af.topics.length) ? af.topics[0].id : null;
+      }
+
+      saveData(data);
+      render();
+    }
+
+    function deleteActiveTopic() {
+      const data = loadData();
+      const folder = getActiveFolder(data);
+      const topic = getActiveTopic(folder, data);
+      if (!folder || !topic) { alert('Select a folder and subtopic first.'); return; }
+
+      const ok = confirm('Delete subtopic "' + (topic.group || 'General') + ' → ' + topic.name + '" and ALL its saved items?');
+      if (!ok) return;
+
+      folder.topics = (folder.topics || []).filter(t => t.id !== topic.id);
+      data.activeTopicId = folder.topics.length ? folder.topics[0].id : null;
       saveData(data);
       render();
     }
@@ -710,13 +882,30 @@
         left.appendChild(strong);
         left.appendChild(span);
 
+        const right = document.createElement('div');
+        right.style.display = 'flex';
+        right.style.alignItems = 'center';
+        right.style.gap = '8px';
+
         const badge = document.createElement('div');
         badge.className = 'badge';
         const itemCount = folder.topics.reduce((acc, t) => acc + ((t.items || []).length), 0);
         badge.textContent = String(itemCount);
 
+        const del = document.createElement('button');
+        del.className = 'icon-btn danger';
+        del.title = 'Delete folder';
+        del.textContent = '×';
+        del.onclick = (e) => {
+          e.stopPropagation();
+          deleteFolder(folder.id);
+        };
+
+        right.appendChild(badge);
+        right.appendChild(del);
+
         div.appendChild(left);
-        div.appendChild(badge);
+        div.appendChild(right);
         list.appendChild(div);
       });
 
@@ -731,7 +920,7 @@
       const data = loadData();
       const folder = getActiveFolder(data);
       const select = $('topicSelect');
-      select.innerHTML = '<option value="">Select a topic…</option>';
+      select.innerHTML = '<option value="">Select a subtopic…</option>';
 
       if (!folder) {
         $('activeFolderTitle').textContent = '📚 Select a folder';
@@ -740,13 +929,24 @@
       }
 
       $('activeFolderTitle').textContent = '📚 ' + folder.name;
-      $('activeFolderSub').textContent = 'Folder → Topics → Saved items (assignments & notes)';
+      $('activeFolderSub').textContent = 'Folder → Main Topic → Subtopic → Saved items (assignments & notes)';
 
+      const groups = {};
       folder.topics.forEach(topic => {
-        const opt = document.createElement('option');
-        opt.value = topic.id;
-        opt.textContent = topic.name + ' (' + ((topic.items || []).length) + ')';
-        select.appendChild(opt);
+        const g = topic.group || 'General';
+        (groups[g] ||= []).push(topic);
+      });
+
+      Object.keys(groups).sort().forEach(g => {
+        const og = document.createElement('optgroup');
+        og.label = g;
+        groups[g].forEach(topic => {
+          const opt = document.createElement('option');
+          opt.value = topic.id;
+          opt.textContent = topic.name + ' (' + ((topic.items || []).length) + ')';
+          og.appendChild(opt);
+        });
+        select.appendChild(og);
       });
 
       if (data.activeTopicId) select.value = data.activeTopicId;
@@ -761,7 +961,7 @@
 
       if (!folder) { hint.textContent = 'Pick a folder on the left.'; return; }
       if (!topic) { hint.textContent = 'Create a topic (chapter) so we can save your outputs.'; return; }
-      hint.textContent = 'Saving to: ' + folder.name + ' → ' + topic.name;
+      hint.textContent = 'Saving to: ' + folder.name + ' → ' + (topic.group || 'General') + ' → ' + topic.name;
     }
 
     function renderLibrary() {
@@ -798,8 +998,105 @@
       view.textContent = lines.join('\n');
     }
 
+    function getRecentClearedAt() {
+      try {
+        const raw = localStorage.getItem(RECENT_KEY);
+        if (!raw) return 0;
+        const parsed = JSON.parse(raw);
+        return typeof parsed.clearedAt === 'number' ? parsed.clearedAt : 0;
+      } catch {
+        return 0;
+      }
+    }
+
+    function setRecentClearedAt(ts) {
+      localStorage.setItem(RECENT_KEY, JSON.stringify({ clearedAt: ts }));
+    }
+
+    function timeAgo(ts) {
+      const diff = Date.now() - ts;
+      const mins = Math.floor(diff / 60000);
+      if (mins < 1) return 'now';
+      if (mins < 60) return mins + 'm';
+      const hrs = Math.floor(mins / 60);
+      if (hrs < 24) return hrs + 'h';
+      const days = Math.floor(hrs / 24);
+      return days + 'd';
+    }
+
+    function openTopic(folderId, topicId) {
+      const data = loadData();
+      data.activeFolderId = folderId;
+      data.activeTopicId = topicId;
+      saveData(data);
+      render();
+    }
+
+    function renderRecent() {
+      const list = $('recentList');
+      if (!list) return;
+      list.innerHTML = '';
+
+      const clearedAt = getRecentClearedAt();
+      const data = loadData();
+      const entries = [];
+
+      (data.folders || []).forEach(f => {
+        (f.topics || []).forEach(t => {
+          const items = (t.items || []);
+          if (!items.length) return;
+          const latest = items.reduce((a, b) => (a.ts > b.ts ? a : b));
+          if (latest.ts <= clearedAt) return;
+          entries.push({
+            folderId: f.id,
+            topicId: t.id,
+            folderName: f.name,
+            topicName: t.name,
+            ts: latest.ts,
+          });
+        });
+      });
+
+      entries.sort((a, b) => b.ts - a.ts);
+      const top = entries.slice(0, 6);
+
+      if (!top.length) {
+        const empty = document.createElement('div');
+        empty.className = 'tiny';
+        empty.textContent = 'No recent items yet.';
+        list.appendChild(empty);
+        return;
+      }
+
+      top.forEach(e => {
+        const div = document.createElement('div');
+        div.className = 'recent-item';
+        div.onclick = () => openTopic(e.folderId, e.topicId);
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+
+        const strong = document.createElement('strong');
+        strong.textContent = e.topicName;
+
+        const span = document.createElement('span');
+        span.textContent = e.folderName;
+
+        meta.appendChild(strong);
+        meta.appendChild(span);
+
+        const when = document.createElement('div');
+        when.className = 'when';
+        when.textContent = timeAgo(e.ts);
+
+        div.appendChild(meta);
+        div.appendChild(when);
+        list.appendChild(div);
+      });
+    }
+
     function renderTabs() {
-      const tabs = document.querySelectorAll('.tab');
+      const tabs = document.querySelectorAll('.navtab');
       const map = {
         assignment: $('tab-assignment'),
         notes: $('tab-notes'),
@@ -825,6 +1122,7 @@
       renderTopics();
       renderTopicHint();
       renderLibrary();
+      renderRecent();
       setAIBadge();
     }
 
@@ -843,6 +1141,7 @@
     };
 
     $('addTopicBtn').onclick = () => {
+      const group = ($('groupName') ? $('groupName').value.trim() : '') || 'General';
       const name = $('topicName').value.trim();
       if (!name) return;
 
@@ -850,14 +1149,19 @@
       const folder = getActiveFolder(data);
       if (!folder) { alert('Pick a folder first.'); return; }
 
-      const newTopic = { id: uid(), name: name, items: [] };
+      const newTopic = { id: uid(), group: group, name: name, items: [] };
       folder.topics.push(newTopic);
       data.activeTopicId = newTopic.id;
       saveData(data);
 
       $('topicName').value = '';
+      if ($('groupName')) $('groupName').value = '';
       render();
     };
+
+    if ($('deleteTopicBtn')) {
+      $('deleteTopicBtn').onclick = () => deleteActiveTopic();
+    }
 
     function fakeDelay(ms) {
       return new Promise(res => setTimeout(res, ms));
@@ -948,13 +1252,18 @@
 
     $('refreshLibraryBtn').onclick = () => renderLibrary();
 
+    $('clearRecentBtn').onclick = () => {
+      setRecentClearedAt(Date.now());
+      renderRecent();
+    };
+
     $('clearTopicBtn').onclick = () => {
       const data = loadData();
       const folder = getActiveFolder(data);
       const topic = getActiveTopic(folder, data);
       if (!folder || !topic) { alert('Select a folder and topic first.'); return; }
 
-      const ok = confirm('Clear all items in ' + folder.name + ' → ' + topic.name + '?');
+      const ok = confirm('Clear all items in ' + folder.name + ' → ' + (topic.group || 'General') + ' → ' + topic.name + '?');
       if (!ok) return;
 
       topic.items = [];
@@ -985,3 +1294,6 @@
     loadAIState();
     render();
     renderTabs();
+  </script>
+</body>
+</html>
