@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StudyPilot MVP</title>
+  <title>StudyPilot MVP (Updated)</title>
   <style>
     :root {
       --bg: #0b1220;
@@ -193,6 +193,11 @@
       font-weight: 600;
     }
 
+    .btn.secondary.on {
+      background: rgba(47,128,237,0.18);
+      border-color: rgba(100,181,255,0.45);
+    }
+
     .btn.ghost {
       background: transparent;
       border: 1px solid var(--border);
@@ -376,7 +381,12 @@
           <p>MVP Prototype · organize by folder → topic → items</p>
         </div>
       </div>
-      <div class="pill">🛡️ Academic-safe mode · explains, doesn’t solve</div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+        <div class="pill">🛡️ Academic-safe mode · explains, doesn’t solve</div>
+        <button class="btn secondary" id="aiToggleBtn" title="Toggle Offline/AI mode" style="padding:8px 10px; border-radius:999px; font-size:12px;">
+          🤖 Offline Mode
+        </button>
+      </div>
     </div>
   </header>
 
@@ -490,6 +500,124 @@
   <script>
     const STORAGE_KEY = 'studypilot_mvp_data_v1';
     const $ = (id) => document.getElementById(id);
+
+    // ===== AI / Offline Mode (offline works without internet) =====
+    const AI_STATE_KEY = 'studypilot_ai_state_v1';
+
+    const AI_CONFIG = {
+      // Later (when you have a Worker + key), set this to your Worker URL:
+      // workerUrl: "https://studypilot-api.YOURNAME.workers.dev",
+      workerUrl: "",
+      enabled: false,
+    };
+
+    function loadAIState() {
+      try {
+        const raw = localStorage.getItem(AI_STATE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (typeof parsed.enabled === 'boolean') AI_CONFIG.enabled = parsed.enabled;
+        if (typeof parsed.workerUrl === 'string') AI_CONFIG.workerUrl = parsed.workerUrl;
+      } catch {
+        // ignore
+      }
+    }
+
+    function saveAIState() {
+      localStorage.setItem(
+        AI_STATE_KEY,
+        JSON.stringify({ enabled: AI_CONFIG.enabled, workerUrl: AI_CONFIG.workerUrl })
+      );
+    }
+
+    function setAIBadge() {
+      const btn = $('aiToggleBtn');
+      if (!btn) return;
+
+      const aiReady = AI_CONFIG.enabled && !!AI_CONFIG.workerUrl;
+      btn.textContent = aiReady ? '🤖 AI Mode' : '🤖 Offline Mode';
+      btn.classList.toggle('on', aiReady);
+      btn.title = aiReady
+        ? 'AI Mode is ON (calling your Worker URL)'
+        : 'Offline Mode works without internet. Later: add a Worker URL to enable AI.';
+    }
+
+    async function callAI(mode, text) {
+      // Offline-first: always works.
+      if (!AI_CONFIG.enabled || !AI_CONFIG.workerUrl) {
+        return offlineGenerate(mode, text);
+      }
+
+      const res = await fetch(AI_CONFIG.workerUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode, text }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error('AI error: ' + JSON.stringify(data));
+      return data.content;
+    }
+
+    function offlineGenerate(mode, text) {
+      const cleaned = (text || '').trim();
+
+      if (mode === 'assignment') {
+        return [
+          'Assignment Breakdown (offline mode)',
+          '',
+          '1) Deliverables checklist:',
+          '- [ ] What must be submitted? (report / code / diagrams / screenshots / slides)',
+          '- [ ] File format required? (PDF / ZIP / docx)',
+          '- [ ] File naming rules?',
+          '- [ ] Due date & submission portal?',
+          '',
+          '2) Requirements to extract from the prompt:',
+          '- Constraints (word count, features, datasets, tools)',
+          '- Rubric headings (copy them exactly)',
+          '- Required diagrams/tables/tests',
+          '',
+          '3) Plan of attack:',
+          '- Highlight action verbs (design, implement, analyze, compare)',
+          '- Turn rubric into a checklist and tick it off',
+          '- Add screenshots/proof early, not at the end',
+          '',
+          cleaned
+            ? 'Input preview: "' + normalizePreview(cleaned.slice(0, 200)) + (cleaned.length > 200 ? '…' : '') + '"'
+            : 'Tip: Paste the assignment instructions in the lecture box for a more tailored breakdown.'
+        ].join('\n');
+      }
+
+      // notes
+      if (!cleaned) {
+        return [
+          'Lecture Notes (offline mode)',
+          '',
+          'Paste lecture content and I’ll format it into clean notes + quick recall bullets.'
+        ].join('\n');
+      }
+
+      const bullets = cleaned
+        .replace(/\r/g, '')
+        .split(/\n+/)
+        .flatMap(line => line.split(/(?<=[.!?])\s+/))
+        .map(s => s.trim())
+        .filter(Boolean)
+        .slice(0, 18)
+        .map(s => '• ' + s);
+
+      return [
+        'Lecture Notes (offline mode)',
+        '',
+        'Key points:',
+        bullets.join('\n') || '• (No content detected)',
+        '',
+        'Quick recall (make flashcards):',
+        '• Definition: ______ is ______',
+        '• Example: ______ demonstrates ______',
+        '• Common mistake: ______'
+      ].join('\n');
+    }
 
     function uid() {
       return Math.random().toString(16).slice(2) + Date.now().toString(16);
@@ -697,6 +825,7 @@
       renderTopics();
       renderTopicHint();
       renderLibrary();
+      setAIBadge();
     }
 
     $('addFolderBtn').onclick = () => {
@@ -758,9 +887,10 @@
     }
 
     function normalizePreview(s) {
-      let out = s.replaceAll('\n', ' ').replaceAll('\t', ' ');
-      while (out.indexOf('  ') !== -1) out = out.replaceAll('  ', ' ');
-      return out.trim();
+      return (s || "")
+        .replace(/[\n\t]+/g, " ")
+        .replace(/\s{2,}/g, " ")
+        .trim();
     }
 
     $('explainBtn').onclick = async () => {
@@ -778,28 +908,18 @@
       const file = $('assignmentFile').files[0];
       const fileName = file ? file.name : 'your assignment';
 
-      const demo = [
-        'Assignment Breakdown (demo): ' + fileName,
-        '',
-        '1) What you are being asked to deliver:',
-        '   - Identify the required outputs (report / code / diagrams / screenshots).',
-        '   - Note formatting rules (PDF, naming, due date, submission platform).',
-        '',
-        '2) Checklist before submitting:',
-        '   - Did you answer every bullet in the prompt?',
-        '   - Did you follow the rubric headings exactly?',
-        '   - Did you include screenshots / references where required?',
-        '',
-        '3) Common mark-loss traps:',
-        '   - Missing one tiny requirement (file name, diagram labels).',
-        '   - Wrong assumptions (e.g., subnet mask / constraints).',
-        '   - No explanation of steps (even if the final answer is correct).'
-      ].join('\n');
+      // Offline-first: if the student pasted instructions into the lecture box, we use that.
+      const pasted = ($('lectureText') && $('lectureText').value) ? $('lectureText').value.trim() : '';
+      const promptText = pasted
+        ? ('Assignment instructions:\n' + pasted)
+        : ('Student uploaded file: ' + fileName + '. Provide a checklist + what to look for.');
+
+      const result = await callAI('assignment', promptText);
 
       setStatus(status, false, '');
-      showOutput(out, demo);
+      showOutput(out, result);
 
-      saveItem('Assignment', 'Explained: ' + fileName, demo);
+      saveItem('Assignment', 'Explained: ' + fileName, result);
       render();
     };
 
@@ -816,28 +936,13 @@
       await fakeDelay(900);
 
       const text = $('lectureText').value.trim();
-      const preview = text ? normalizePreview(text.slice(0, 120)) : 'lecture content';
-      const more = text.length > 120 ? '…' : '';
 
-      const demo = [
-        'Lecture Notes (demo):',
-        '',
-        'Key ideas:',
-        '• Main concept summary in simple language',
-        '• Definitions + 1 example each',
-        '• What professors love asking on exams',
-        '',
-        'Quick recall:',
-        '• 3 bullet flashcards you can memorize',
-        '• 2 common mistakes to avoid',
-        '',
-        'Input preview: "' + preview + more + '"'
-      ].join('\n');
+      const result = await callAI('notes', text);
 
       setStatus(status, false, '');
-      showOutput(out, demo);
+      showOutput(out, result);
 
-      saveItem('Notes', 'Generated notes', demo);
+      saveItem('Notes', 'Generated notes', result);
       render();
     };
 
@@ -850,3 +955,33 @@
       if (!folder || !topic) { alert('Select a folder and topic first.'); return; }
 
       const ok = confirm('Clear all items in ' + folder.name + ' → ' + topic.name + '?');
+      if (!ok) return;
+
+      topic.items = [];
+      saveData(data);
+      render();
+    };
+
+    $('resetBtn').onclick = () => {
+      const ok = confirm('Reset demo data? This will wipe folders/topics/items stored in this browser.');
+      if (!ok) return;
+      localStorage.removeItem(STORAGE_KEY);
+      render();
+    };
+
+    $('aiToggleBtn').onclick = () => {
+      // Offline always works. AI requires a Worker URL.
+      if (!AI_CONFIG.workerUrl) {
+        AI_CONFIG.enabled = false;
+        saveAIState();
+        setAIBadge();
+        alert('Offline Mode is enabled (works without internet).\n\nTo enable AI later, add your Worker URL into AI_CONFIG.workerUrl in the code.');
+        return;
+      }
+      AI_CONFIG.enabled = !AI_CONFIG.enabled;
+      saveAIState();
+      setAIBadge();
+    };
+    loadAIState();
+    render();
+    renderTabs();
