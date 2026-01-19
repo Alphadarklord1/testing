@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyPilot MVP (Updated)</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --border: rgba(255,255,255,0.12);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.70);
+      --muted-2: rgba(255,255,255,0.55);
+      --brand: #2f80ed;
+      --brand-2: #64b5ff;
+      --danger: #ff5b5b;
+      --shadow: 0 18px 50px rgba(0,0,0,0.45);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(47,128,237,0.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 10%, rgba(100,181,255,0.20), transparent 60%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(12, 18, 32, 0.72);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .topbar {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 18px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: 0 10px 30px rgba(47,128,237,0.35);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #06121f;
+      flex: 0 0 auto;
+    }
+
+    .brand h1 {
+      font-size: 18px;
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    .brand p {
+      margin: 2px 0 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .pill {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      padding: 8px 10px;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 18px 16px 40px;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 980px) {
+      .wrap { grid-template-columns: 1fr; }
+      .pill { display: none; }
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .panel-header h2 {
+      font-size: 14px;
+      margin: 0;
+      letter-spacing: 0.2px;
+    }
+
+    .panel-header .sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .panel-body { padding: 14px; }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    input[type="text"], textarea, select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(0,0,0,0.30);
+      color: var(--text);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    
+    input[type="text"]:focus, textarea:focus, select:focus {
+      border-color: var(--brand);
+      background: rgba(0,0,0,0.40);
+      box-shadow: 0 0 0 3px rgba(47,128,237,0.15);
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px dashed rgba(255,255,255,0.22);
+      background: rgba(0,0,0,0.18);
+      color: var(--muted);
+    }
+
+    textarea { 
+      min-height: 140px; 
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .btn {
+      border: none;
+      background: linear-gradient(135deg, #2f80ed, #64b5ff);
+      color: #fff;
+      font-weight: 700;
+      padding: 11px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+      box-shadow: 0 4px 12px rgba(47,128,237,0.3);
+    }
+
+    .btn:active { 
+      transform: translateY(1px); 
+      box-shadow: 0 2px 8px rgba(47,128,237,0.2);
+    }
+    
+    .btn:hover { 
+      box-shadow: 0 6px 16px rgba(47,128,237,0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn.secondary {
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-weight: 600;
+    }
+
+    .btn.secondary.on {
+      background: rgba(47,128,237,0.18);
+      border-color: rgba(100,181,255,0.45);
+    }
+
+    .btn.ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .btn.danger {
+      background: rgba(255,91,91,0.12);
+      border: 1px solid rgba(255,91,91,0.35);
+      color: #ffd7d7;
+    }
+
+    .hint {
+      margin-top: 8px;
+      color: var(--muted-2);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 12px 0;
+    }
+
+    .tiny {
+      font-size: 11px;
+      color: var(--muted-2);
+    }
+
+    .folder-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .recent-list {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .recent-item {
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      cursor: pointer;
+      transition: background 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .recent-item:hover { background: rgba(255,255,255,0.06); }
+
+    .recent-item .meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .recent-item .meta strong {
+      font-size: 12.5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .recent-item .meta span {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .recent-item .when {
+      font-size: 11px;
+      color: var(--muted-2);
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+
+    .folder {
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .folder:hover { background: rgba(255,255,255,0.06); }
+
+    .folder.active {
+      border-color: rgba(100,181,255,0.55);
+      background: rgba(47,128,237,0.12);
+      box-shadow: 0 10px 30px rgba(47,128,237,0.15);
+    }
+
+    .folder .name {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .folder .name strong {
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .folder .name span {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .badge {
+      font-size: 12px;
+      color: rgba(255,255,255,0.86);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--border);
+      padding: 5px 9px;
+      border-radius: 999px;
+      flex: 0 0 auto;
+    }
+
+    .icon-btn {
+      background: rgba(0,0,0,0.0);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 6px 8px;
+      cursor: pointer;
+      font-weight: 800;
+      line-height: 1;
+      user-select: none;
+    }
+
+    .icon-btn:hover { background: rgba(255,255,255,0.06); }
+
+    .icon-btn.danger {
+      border-color: rgba(255,91,91,0.35);
+      color: #ffd7d7;
+      background: rgba(255,91,91,0.10);
+    }
+
+
+    .main-split {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .subnav {
+      display: grid;
+      gap: 12px;
+      position: sticky;
+      top: 86px;
+    }
+
+    .subnav-tabs {
+      display: grid;
+      gap: 8px;
+    }
+
+    .navtab {
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 12.5px;
+      font-weight: 700;
+      user-select: none;
+      transition: background 0.15s ease;
+    }
+
+    .navtab:hover { background: rgba(255,255,255,0.06); }
+
+    .navtab.active {
+      color: var(--text);
+      background: rgba(47,128,237,0.18);
+      border-color: rgba(100,181,255,0.45);
+      box-shadow: 0 10px 30px rgba(47,128,237,0.12);
+    }
+
+    .subview {
+      min-width: 0;
+    }
+
+    @media (max-width: 980px) {
+      .main-split { grid-template-columns: 1fr; }
+      .subnav { position: relative; top: auto; }
+      .subnav-tabs { grid-template-columns: repeat(3, 1fr); }
+      .navtab { text-align: center; }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+      box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+      transform: translateY(-2px);
+    }
+
+    .card h3 {
+      margin: 0 0 8px 0;
+      font-size: 15px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #64b5ff, #2f80ed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .card p {
+      margin: 0 0 12px 0;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.45;
+    }
+
+    .output {
+      margin-top: 14px;
+      padding: 16px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(47,128,237,0.08), rgba(100,181,255,0.05));
+      border: 1px solid rgba(100,181,255,0.25);
+      color: rgba(255,255,255,0.92);
+      font-size: 13.5px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    .status {
+      display: none;
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .status.show { display: block; }
+
+    footer {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 10px 16px 28px;
+      color: var(--muted-2);
+      font-size: 12px;
+      text-align: center;
+    }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 18px;
+      border-radius: 12px;
+      background: rgba(12, 18, 32, 0.95);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 13px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+      z-index: 1000;
+      max-width: 300px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .toast.success {
+      border-color: rgba(74,222,128,0.35);
+    }
+
+    .toast.error {
+      border-color: rgba(255,91,91,0.35);
+    }
+
+    .library-item {
+      margin-bottom: 18px;
+      padding: 16px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+    
+    .library-item:hover {
+      background: rgba(255,255,255,0.07);
+      border-color: rgba(255,255,255,0.18);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      transform: translateY(-2px);
+    }
+
+    .library-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .library-item-title {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .library-item-title strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .library-item-title .meta {
+      font-size: 11px;
+      color: var(--muted-2);
+    }
+
+    .library-item-actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .library-item-content {
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--muted);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 8px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">SP</div>
+        <div>
+          <h1>StudyPilot AI</h1>
+          <p>MVP Prototype · organize by folder → topic → items</p>
+        </div>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+        <div class="pill">🛡️ Academic-safe mode · explains, doesn’t solve</div>
+        <button class="btn secondary" id="aiToggleBtn" title="Toggle Offline/AI mode" style="padding:8px 10px; border-radius:999px; font-size:12px;">
+          🤖 Offline Mode
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <aside class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>📁 Study Folders</h2>
+          <div class="sub">Subjects / Courses</div>
+        </div>
+        <button class="btn ghost" id="resetBtn" title="Reset demo data">Reset</button>
+      </div>
+      <div class="panel-body">
+        <div class="row">
+          <input id="folderName" type="text" placeholder="Add a folder (e.g., NET101, Java, Math)" />
+          <button class="btn" id="addFolderBtn">Add</button>
+        </div>
+        <div class="hint">Folders are your big buckets. Inside each folder, add a <b>Main Topic</b> + <b>Subtopic</b>. Every output will be saved under your chosen subtopic.</div>
+
+        <div class="divider"></div>
+
+        <div id="folderList" class="folder-list"></div>
+
+        <div class="divider"></div>
+
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <div style="font-size:12px; color: var(--muted); font-weight:800; letter-spacing:0.2px;">🕘 Recent</div>
+          <button class="btn ghost" id="clearRecentBtn" title="Clear recent list" style="padding:6px 10px; border-radius:999px; font-size:12px;">Clear</button>
+        </div>
+        <div id="recentList" class="recent-list"></div>
+
+        <div class="divider"></div>
+        <div class="tiny">Saved locally in your browser (localStorage). No accounts yet.</div>
+      </div>
+    </aside>
+
+    <main class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 id="activeFolderTitle">📚 Select a folder</h2>
+          <div class="sub" id="activeFolderSub">Then create a topic to start organizing your work.</div>
+        </div>
+      </div>
+
+      <div class="panel-body">
+        <div class="main-split">
+          <nav class="subnav">
+            <div class="card" id="topicCard" style="margin:0;">
+              <h3>🎯 Topic (inside this folder)</h3>
+              <p>Create a <b>Main Topic</b> (chapter) and then add <b>Subtopics</b>. Everything you generate will be saved under the selected subtopic.</p>
+              <div style="display:grid; gap:10px;">
+                <input id="groupName" type="text" placeholder="Main topic (e.g., Networking / OOP / Databases)" />
+                <div class="row">
+                  <input id="topicName" type="text" placeholder="Subtopic (e.g., Subnetting / Inheritance / SQL Joins)" />
+                  <button class="btn" id="addTopicBtn">Add</button>
+                </div>
+              </div>
+              <div style="margin-top:10px; display:grid; gap:10px;">
+                <div class="row">
+                  <select id="topicSelect">
+                    <option value="">Select a subtopic…</option>
+                  </select>
+                  <button class="btn danger" id="deleteTopicBtn" title="Delete selected subtopic">Delete</button>
+                </div>
+                <div class="hint" id="topicHint">Pick a folder + create a topic to unlock saving.</div>
+              </div>
+            </div>
+
+            <div class="subnav-tabs" role="tablist" aria-label="Tools">
+              <div class="navtab active" data-tab="assignment">📄 Assignment</div>
+              <div class="navtab" data-tab="summarize">🧾 Summarize</div>
+              <div class="navtab" data-tab="mcq">✅ MCQ</div>
+              <div class="navtab" data-tab="quiz">🧠 Quiz</div>
+              <div class="navtab" data-tab="pop">⚡ Pop Quiz</div>
+              <div class="navtab" data-tab="notes">📝 Notes</div>
+              <div class="navtab" data-tab="library">🗂️ Library</div>
+            </div>
+
+            <div class="hint" style="margin-top:10px;">Tip: generate something → it appears in Library. Offline mode works without internet.</div>
+          </nav>
+
+          <section class="subview">
+            <div class="grid" id="tab-assignment">
+              <div class="card">
+                <h3>📄 Assignment Explainer</h3>
+                <p>Paste your assignment instructions and get a clean checklist + breakdown. (Browser note: PDFs/images can’t be read as text without OCR/server — paste text for best results.)</p>
+                <textarea id="assignmentText" placeholder="Paste assignment instructions here (recommended)…"></textarea>
+
+                <input id="assignmentFile" type="file" accept=".pdf,.png,.jpg,.jpeg" />
+                <button class="btn" id="explainBtn">Explain Assignment</button>
+
+                <div class="status" id="assignStatus">Analyzing…</div>
+                <div class="output" id="assignmentOutput" style="display:none;"></div>
+
+                <div class="hint">✅ Pick the correct <b>Folder</b> and <b>Topic</b> first so this result gets saved in your Library.</div>
+              </div>
+            </div>
+
+            <div class="grid" id="tab-summarize" style="display:none;">
+              <div class="card">
+                <h3>🧾 Lesson Summarizer</h3>
+                <p>Paste lesson content and get a clean summary + key points + quick recall prompts.</p>
+                <textarea id="lessonText" placeholder="Paste lesson text here…"></textarea>
+
+                <button class="btn" id="summarizeBtn">Summarize Lesson</button>
+
+                <div class="status" id="sumStatus">Working…</div>
+                <div class="output" id="sumOutput" style="display:none;"></div>
+
+                <div class="hint">✅ Saved to your selected Folder → Main Topic → Subtopic.</div>
+              </div>
+            </div>
+
+            <div class="grid" id="tab-mcq" style="display:none;">
+              <div class="card">
+                <h3>✅ MCQ Generator</h3>
+                <p>Paste a lesson and generate multiple-choice questions (offline-friendly).</p>
+                <textarea id="mcqText" placeholder="Paste lesson text (or summary) here…"></textarea>
+
+                <button class="btn" id="mcqBtn">Generate MCQs</button>
+
+                <div class="status" id="mcqStatus">Generating…</div>
+                <div class="output" id="mcqOutput" style="display:none;"></div>
+
+                <div class="hint">Tip: better input = better questions.</div>
+              </div>
+            </div>
+
+            <div class="grid" id="tab-quiz" style="display:none;">
+              <div class="card">
+                <h3>🧠 Quiz Builder (Short Answer)</h3>
+                <p>Generates open-ended questions you can answer yourself.</p>
+                <textarea id="quizText" placeholder="Paste lesson text here…"></textarea>
+
+                <button class="btn" id="quizBtn">Generate Quiz</button>
+
+                <div class="status" id="quizStatus">Building quiz…</div>
+                <div class="output" id="quizOutput" style="display:none;"></div>
+              </div>
+            </div>
+
+            <div class="grid" id="tab-pop" style="display:none;">
+              <div class="card">
+                <h3>⚡ Pop Quiz (Fast Recall)</h3>
+                <p>Quick-fire prompts for revision. Great before class or exams.</p>
+                <textarea id="popText" placeholder="Paste lesson text here…"></textarea>
+
+                <button class="btn" id="popBtn">Generate Pop Quiz</button>
+
+                <div class="status" id="popStatus">Creating pop quiz…</div>
+                <div class="output" id="popOutput" style="display:none;"></div>
+              </div>
+            </div>
+
+            <div class="grid" id="tab-notes" style="display:none;">
+              <div class="card">
+                <h3>📝 Lecture-to-Notes</h3>
+                <p>Paste lecture content (or assignment instructions). Offline mode will format notes and create quick recall prompts.</p>
+                <textarea id="lectureText" placeholder="Paste lecture content here…"></textarea>
+
+                <button class="btn" id="notesBtn">Generate Notes</button>
+
+                <div class="status" id="notesStatus">Summarizing…</div>
+                <div class="output" id="notesOutput" style="display:none;"></div>
+
+                <div class="hint">Later: PDF text extraction + real AI (optional).</div>
+              </div>
+            </div>
+
+            <div class="grid" id="tab-library" style="display:none;">
+              <div class="card">
+                <h3>🗂️ Topic Library</h3>
+                <p>Everything you generate gets saved here under <b>Folder → Topic</b>. This is your study archive.</p>
+
+                <div id="libraryView" class="output">Select a folder + topic to view saved items.</div>
+
+                <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+                  <button class="btn secondary" id="refreshLibraryBtn">Refresh</button>
+                  <button class="btn danger" id="clearTopicBtn">Clear Topic Items</button>
+                </div>
+
+                <div class="hint">This data is stored locally in your browser for now.</div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer>
+    © 2026 StudyPilot AI — MVP Demo · Next step: replace demo outputs with real AI + file text extraction.
+  </footer>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const STORAGE_KEY = 'studypilot_mvp_data_v1';
+    const $ = (id) => document.getElementById(id);
+    const RECENT_KEY = 'studypilot_recent_v1';
+
+    function showToast(message, type) {
+      const toast = $('toast');
+      toast.textContent = message;
+      toast.className = 'toast show ' + (type || 'success');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // ===== AI / Offline Mode (offline works without internet) =====
+    const AI_STATE_KEY = 'studypilot_ai_state_v1';
+
+    const AI_CONFIG = {
+      // Later (when you have a Worker + key), set this to your Worker URL:
+      // workerUrl: "https://studypilot-api.YOURNAME.workers.dev",
+      workerUrl: "",
+      enabled: false,
+    };
+
+    function loadAIState() {
+      try {
+        const raw = localStorage.getItem(AI_STATE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (typeof parsed.enabled === 'boolean') AI_CONFIG.enabled = parsed.enabled;
+        if (typeof parsed.workerUrl === 'string') AI_CONFIG.workerUrl = parsed.workerUrl;
+      } catch {
+        // ignore
+      }
+    }
+
+    function saveAIState() {
+      localStorage.setItem(
+        AI_STATE_KEY,
+        JSON.stringify({ enabled: AI_CONFIG.enabled, workerUrl: AI_CONFIG.workerUrl })
+      );
+    }
+
+    function setAIBadge() {
+      const btn = $('aiToggleBtn');
+      if (!btn) return;
+
+      const aiReady = AI_CONFIG.enabled && !!AI_CONFIG.workerUrl;
+      btn.textContent = aiReady ? '🤖 AI Mode' : '🤖 Offline Mode';
+      btn.classList.toggle('on', aiReady);
+      btn.title = aiReady
+        ? 'AI Mode is ON (calling your Worker URL)'
+        : 'Offline Mode works without internet. Later: add a Worker URL to enable AI.';
+    }
+
+    async function callAI(mode, text) {
+      // Offline-first: always works.
+      if (!AI_CONFIG.enabled || !AI_CONFIG.workerUrl) {
+        return offlineGenerate(mode, text);
+      }
+
+      const res = await fetch(AI_CONFIG.workerUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode, text }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error('AI error: ' + JSON.stringify(data));
+      return data.content;
+    }
+
+    function offlineGenerate(mode, text) {
+      const cleaned = (text || '').trim();
+
+      if (mode === 'assignment') {
+        if (!cleaned) {
+          return 'Assignment Breakdown (offline mode)\n\nPaste your assignment instructions above and click Explain Assignment.\n\nTip: copy/paste the assignment text (questions, rubric, requirements).';
+        }
+        return assignmentBreakdownFromText(cleaned);
+      }
+
+      if (mode === 'summarize') {
+        if (!cleaned) {
+          return 'Lesson Summary (offline mode)\n\nPaste lesson content and click Summarize Lesson.';
+        }
+
+        const lines = cleaned.replace(/\r/g, '').split(/\n+/);
+        const sentences = [];
+        for (let i = 0; i < lines.length; i++) {
+          const parts = lines[i].split(/[.!?]\s+/);
+          for (let j = 0; j < parts.length; j++) {
+            const trimmed = parts[j].trim();
+            if (trimmed) sentences.push(trimmed);
+          }
+        }
+        const bullets = sentences.slice(0, 10).map(s => '• ' + s);
+
+        return 'Lesson Summary (offline mode)\n\nKey points:\n' + bullets.join('\n') + '\n\nQuick recall:\n• Define: ______\n• Explain why: ______\n• Give an example of: ______';
+      }
+
+      if (mode === 'mcq') {
+        if (!cleaned) {
+          return 'MCQ Set (offline mode)\n\nPaste lesson content and click Generate MCQs.';
+        }
+        return makeOfflineMCQs(cleaned);
+      }
+
+      if (mode === 'quiz') {
+        if (!cleaned) {
+          return 'Quiz (Short Answer) - offline mode\n\nPaste lesson content and click Generate Quiz.';
+        }
+
+        const parts = cleaned.replace(/\r/g, '').split(/[.!?]\s+/);
+        const sents = parts.map(x => x.trim()).filter(Boolean);
+        const pick = sents.slice(0, 8);
+        const qs = pick.map((s, i) => {
+          const short = normalizePreview(s).slice(0, 90);
+          return (i + 1) + ') Explain this in your own words: "' + short + '..."';
+        });
+
+        return 'Quiz (Short Answer) - offline mode\n\n' + qs.join('\n');
+      }
+
+      if (mode === 'pop') {
+        if (!cleaned) {
+          return 'Pop Quiz (Fast Recall) - offline mode\n\nPaste lesson content and click Generate Pop Quiz.';
+        }
+
+        const parts = cleaned.replace(/\r/g, '').split(/[.!?]\s+/);
+        const sents = parts.map(x => x.trim()).filter(Boolean);
+        const pick = sents.slice(0, 5);
+        const qs = pick.map((s, i) => {
+          const short = normalizePreview(s).slice(0, 70);
+          return (i + 1) + ') Pop prompt: What does this mean? "' + short + '..."';
+        });
+
+        return 'Pop Quiz (Fast Recall) - offline mode\n\n' + qs.join('\n');
+      }
+
+      // notes mode (default)
+      if (!cleaned) {
+        return 'Lecture Notes (offline mode)\n\nPaste lecture content and I will format it into clean notes + quick recall bullets.';
+      }
+
+      const lines = cleaned.replace(/\r/g, '').split(/\n+/);
+      const sentences = [];
+      for (let i = 0; i < lines.length; i++) {
+        const parts = lines[i].split(/[.!?]\s+/);
+        for (let j = 0; j < parts.length; j++) {
+          const trimmed = parts[j].trim();
+          if (trimmed) sentences.push(trimmed);
+        }
+      }
+      const bullets = sentences.slice(0, 18).map(s => '• ' + s);
+
+      return 'Lecture Notes (offline mode)\n\nKey points:\n' + bullets.join('\n') + '\n\nQuick recall (make flashcards):\n• Definition: ______ is ______\n• Example: ______ demonstrates ______\n• Common mistake: ______';
+    }
+
+
+    function uid() {
+      return Math.random().toString(16).slice(2) + Date.now().toString(16);
+    }
+
+    function loadData() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        const demo = {
+          folders: [
+            { id: uid(), name: 'NET101', topics: [
+              { id: uid(), name: 'Subnetting', items: [] },
+              { id: uid(), name: 'VLANs', items: [] }
+            ]},
+            { id: uid(), name: 'Java', topics: [
+              { id: uid(), name: 'OOP Basics', items: [] },
+              { id: uid(), name: 'Inheritance', items: [] }
+            ]}
+          ],
+          activeFolderId: null,
+          activeTopicId: null
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(demo));
+        return demo;
+      }
+      try {
+        const parsed = JSON.parse(raw);
+        // Migration: ensure topic.group exists
+        let changed = false;
+        (parsed.folders || []).forEach(f => {
+          (f.topics || []).forEach(t => {
+            if (!t.group) { t.group = 'General'; changed = true; }
+            if (!Array.isArray(t.items)) t.items = [];
+          });
+        });
+        if (changed) localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+        return parsed;
+      }
+      catch {
+        localStorage.removeItem(STORAGE_KEY);
+        return loadData();
+      }
+    }
+
+    function saveData(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function getActiveFolder(data) {
+      return data.folders.find(f => f.id === data.activeFolderId) || null;
+    }
+
+    function getActiveTopic(folder, data) {
+      if (!folder) return null;
+      return folder.topics.find(t => t.id === data.activeTopicId) || null;
+    }
+
+    function setActiveFolder(id) {
+      const data = loadData();
+      data.activeFolderId = id;
+      const folder = data.folders.find(f => f.id === id);
+      data.activeTopicId = folder && folder.topics.length ? folder.topics[0].id : null;
+      saveData(data);
+      render();
+    }
+
+    function deleteFolder(folderId) {
+      const data = loadData();
+      const folder = data.folders.find(f => f.id === folderId);
+      if (!folder) return;
+
+      const ok = confirm('Delete folder "' + folder.name + '" and ALL its topics/items?');
+      if (!ok) return;
+
+      data.folders = data.folders.filter(f => f.id !== folderId);
+
+      // Re-pick active folder/topic
+      if (data.activeFolderId === folderId) {
+        data.activeFolderId = data.folders.length ? data.folders[0].id : null;
+        const af = data.activeFolderId ? data.folders.find(f => f.id === data.activeFolderId) : null;
+        data.activeTopicId = (af && af.topics.length) ? af.topics[0].id : null;
+      }
+
+      saveData(data);
+      render();
+    }
+
+    function deleteActiveTopic() {
+      const data = loadData();
+      const folder = getActiveFolder(data);
+      const topic = getActiveTopic(folder, data);
+      if (!folder || !topic) { alert('Select a folder and subtopic first.'); return; }
+
+      const ok = confirm('Delete subtopic "' + (topic.group || 'General') + ' → ' + topic.name + '" and ALL its saved items?');
+      if (!ok) return;
+
+      folder.topics = (folder.topics || []).filter(t => t.id !== topic.id);
+      data.activeTopicId = folder.topics.length ? folder.topics[0].id : null;
+      saveData(data);
+      render();
+    }
+
+    function setActiveTopic(id) {
+      const data = loadData();
+      data.activeTopicId = id;
+      saveData(data);
+      renderTopicHint();
+    }
+
+    function ensureSelectionOrWarn() {
+      const data = loadData();
+      const folder = getActiveFolder(data);
+      const topic = getActiveTopic(folder, data);
+      if (!folder) { alert('Pick a folder first (left sidebar).'); return null; }
+      if (!topic) { alert('Create/select a topic first so we can save your output.'); return null; }
+      return { data, folder, topic };
+    }
+
+    function renderFolders() {
+      const data = loadData();
+      const list = $('folderList');
+      list.innerHTML = '';
+
+      data.folders.forEach(folder => {
+        const div = document.createElement('div');
+        div.className = 'folder' + (folder.id === data.activeFolderId ? ' active' : '');
+        div.onclick = () => setActiveFolder(folder.id);
+
+        const left = document.createElement('div');
+        left.className = 'name';
+
+        const strong = document.createElement('strong');
+        strong.textContent = folder.name;
+
+        const span = document.createElement('span');
+        span.textContent = folder.topics.length ? (folder.topics.length + ' topics') : 'No topics yet';
+
+        left.appendChild(strong);
+        left.appendChild(span);
+
+        const right = document.createElement('div');
+        right.style.display = 'flex';
+        right.style.alignItems = 'center';
+        right.style.gap = '8px';
+
+        const badge = document.createElement('div');
+        badge.className = 'badge';
+        const itemCount = folder.topics.reduce((acc, t) => acc + ((t.items || []).length), 0);
+        badge.textContent = String(itemCount);
+
+        const del = document.createElement('button');
+        del.className = 'icon-btn danger';
+        del.title = 'Delete folder';
+        del.textContent = '×';
+        del.onclick = (e) => {
+          e.stopPropagation();
+          deleteFolder(folder.id);
+        };
+
+        right.appendChild(badge);
+        right.appendChild(del);
+
+        div.appendChild(left);
+        div.appendChild(right);
+        list.appendChild(div);
+      });
+
+      if (!data.activeFolderId && data.folders.length) {
+        data.activeFolderId = data.folders[0].id;
+        data.activeTopicId = data.folders[0].topics.length ? data.folders[0].topics[0].id : null;
+        saveData(data);
+      }
+    }
+
+    function renderTopics() {
+      const data = loadData();
+      const folder = getActiveFolder(data);
+      const select = $('topicSelect');
+      select.innerHTML = '<option value="">Select a subtopic…</option>';
+
+      if (!folder) {
+        $('activeFolderTitle').textContent = '📚 Select a folder';
+        $('activeFolderSub').textContent = 'Then create a topic to start organizing your work.';
+        return;
+      }
+
+      $('activeFolderTitle').textContent = '📚 ' + folder.name;
+      $('activeFolderSub').textContent = 'Folder → Main Topic → Subtopic → Saved items (assignments & notes)';
+
+      const groups = {};
+      folder.topics.forEach(topic => {
+        const g = topic.group || 'General';
+        (groups[g] ||= []).push(topic);
+      });
+
+      Object.keys(groups).sort().forEach(g => {
+        const og = document.createElement('optgroup');
+        og.label = g;
+        groups[g].forEach(topic => {
+          const opt = document.createElement('option');
+          opt.value = topic.id;
+          opt.textContent = topic.name + ' (' + ((topic.items || []).length) + ')';
+          og.appendChild(opt);
+        });
+        select.appendChild(og);
+      });
+
+      if (data.activeTopicId) select.value = data.activeTopicId;
+      select.onchange = (e) => setActiveTopic(e.target.value);
+    }
+
+    function renderTopicHint() {
+      const data = loadData();
+      const folder = getActiveFolder(data);
+      const topic = getActiveTopic(folder, data);
+      const hint = $('topicHint');
+
+      if (!folder) { hint.textContent = 'Pick a folder on the left.'; return; }
+      if (!topic) { hint.textContent = 'Create a topic (chapter) so we can save your outputs.'; return; }
+      hint.textContent = 'Saving to: ' + folder.name + ' → ' + (topic.group || 'General') + ' → ' + topic.name;
+    }
+
+    function renderLibrary() {
+      const data = loadData();
+      const folder = getActiveFolder(data);
+      const topic = getActiveTopic(folder, data);
+      const view = $('libraryView');
+
+      if (!folder || !topic) {
+        view.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted-2);">Select a folder + topic to view saved items.</div>';
+        return;
+      }
+
+      const items = (topic.items || []).slice().reverse();
+      if (!items.length) {
+        view.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted-2);">No saved items yet in ' + folder.name + ' → ' + topic.name + '.<br>Generate an Assignment explanation or Notes first.</div>';
+        return;
+      }
+
+      view.innerHTML = '';
+      
+      items.forEach((it) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'library-item';
+        
+        const header = document.createElement('div');
+        header.className = 'library-item-header';
+        
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'library-item-title';
+        
+        const strong = document.createElement('strong');
+        strong.textContent = '[' + it.type + '] ' + it.title;
+        
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.textContent = new Date(it.ts).toLocaleString();
+        
+        titleDiv.appendChild(strong);
+        titleDiv.appendChild(meta);
+        
+        const actions = document.createElement('div');
+        actions.className = 'library-item-actions';
+        
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'btn ghost';
+        copyBtn.style.padding = '6px 10px';
+        copyBtn.style.fontSize = '12px';
+        copyBtn.textContent = '📋 Copy';
+        copyBtn.onclick = () => {
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(it.content).then(() => {
+              showToast('Copied to clipboard!', 'success');
+            }).catch(() => {
+              showToast('Failed to copy', 'error');
+            });
+          } else {
+            const textarea = document.createElement('textarea');
+            textarea.value = it.content;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+              document.execCommand('copy');
+              showToast('Copied to clipboard!', 'success');
+            } catch (err) {
+              showToast('Failed to copy', 'error');
+            }
+            document.body.removeChild(textarea);
+          }
+        };
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn danger';
+        deleteBtn.style.padding = '6px 10px';
+        deleteBtn.style.fontSize = '12px';
+        deleteBtn.textContent = '🗑️';
+        deleteBtn.onclick = () => {
+          if (!confirm('Delete this item permanently?')) return;
+          
+          const data2 = loadData();
+          const folder2 = getActiveFolder(data2);
+          const topic2 = getActiveTopic(folder2, data2);
+          
+          if (!topic2) return;
+          
+          topic2.items = topic2.items.filter(i => i.ts !== it.ts);
+          saveData(data2);
+          renderLibrary();
+          showToast('Item deleted', 'success');
+        };
+        
+        actions.appendChild(copyBtn);
+        actions.appendChild(deleteBtn);
+        
+        header.appendChild(titleDiv);
+        header.appendChild(actions);
+        
+        const content = document.createElement('div');
+        content.className = 'library-item-content';
+        content.textContent = it.content;
+        
+        itemDiv.appendChild(header);
+        itemDiv.appendChild(content);
+        view.appendChild(itemDiv);
+      });
+    }
+
+    function getRecentClearedAt() {
+      try {
+        const raw = localStorage.getItem(RECENT_KEY);
+        if (!raw) return 0;
+        const parsed = JSON.parse(raw);
+        return typeof parsed.clearedAt === 'number' ? parsed.clearedAt : 0;
+      } catch {
+        return 0;
+      }
+    }
+
+    function setRecentClearedAt(ts) {
+      localStorage.setItem(RECENT_KEY, JSON.stringify({ clearedAt: ts }));
+    }
+
+    function timeAgo(ts) {
+      const diff = Date.now() - ts;
+      const mins = Math.floor(diff / 60000);
+      if (mins < 1) return 'now';
+      if (mins < 60) return mins + 'm';
+      const hrs = Math.floor(mins / 60);
+      if (hrs < 24) return hrs + 'h';
+      const days = Math.floor(hrs / 24);
+      return days + 'd';
+    }
+
+    function openTopic(folderId, topicId) {
+      const data = loadData();
+      data.activeFolderId = folderId;
+      data.activeTopicId = topicId;
+      saveData(data);
+      render();
+    }
+
+    function renderRecent() {
+      const list = $('recentList');
+      if (!list) return;
+      list.innerHTML = '';
+
+      const clearedAt = getRecentClearedAt();
+      const data = loadData();
+      const entries = [];
+
+      (data.folders || []).forEach(f => {
+        (f.topics || []).forEach(t => {
+          const items = (t.items || []);
+          if (!items.length) return;
+          const latest = items.reduce((a, b) => (a.ts > b.ts ? a : b));
+          if (latest.ts <= clearedAt) return;
+          entries.push({
+            folderId: f.id,
+            topicId: t.id,
+            folderName: f.name,
+            topicName: t.name,
+            ts: latest.ts,
+          });
+        });
+      });
+
+      entries.sort((a, b) => b.ts - a.ts);
+      const top = entries.slice(0, 6);
+
+      if (!top.length) {
+        const empty = document.createElement('div');
+        empty.className = 'tiny';
+        empty.textContent = 'No recent items yet.';
+        list.appendChild(empty);
+        return;
+      }
+
+      top.forEach(e => {
+        const div = document.createElement('div');
+        div.className = 'recent-item';
+        div.onclick = () => openTopic(e.folderId, e.topicId);
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+
+        const strong = document.createElement('strong');
+        strong.textContent = e.topicName;
+
+        const span = document.createElement('span');
+        span.textContent = e.folderName;
+
+        meta.appendChild(strong);
+        meta.appendChild(span);
+
+        const when = document.createElement('div');
+        when.className = 'when';
+        when.textContent = timeAgo(e.ts);
+
+        div.appendChild(meta);
+        div.appendChild(when);
+        list.appendChild(div);
+      });
+    }
+
+    function renderTabs() {
+      const tabs = document.querySelectorAll('.navtab');
+      const map = {
+        assignment: $('tab-assignment'),
+        summarize: $('tab-summarize'),
+        mcq: $('tab-mcq'),
+        quiz: $('tab-quiz'),
+        pop: $('tab-pop'),
+        notes: $('tab-notes'),
+        library: $('tab-library')
+      };
+
+      tabs.forEach(t => {
+        t.onclick = () => {
+          tabs.forEach(x => x.classList.remove('active'));
+          t.classList.add('active');
+
+          Object.keys(map).forEach(k => { if (map[k]) map[k].style.display = 'none'; });
+          const key = t.getAttribute('data-tab');
+          if (map[key]) map[key].style.display = 'block';
+
+          if (key === 'library') renderLibrary();
+        };
+      });
+    }
+
+    function render() {
+      renderFolders();
+      renderTopics();
+      renderTopicHint();
+      renderLibrary();
+      renderRecent();
+      setAIBadge();
+    }
+
+    $('addFolderBtn').onclick = () => {
+      const name = $('folderName').value.trim();
+      if (!name) {
+        showToast('Please enter a folder name', 'error');
+        return;
+      }
+
+      const data = loadData();
+      data.folders.push({ id: uid(), name: name, topics: [] });
+      data.activeFolderId = data.folders[data.folders.length - 1].id;
+      data.activeTopicId = null;
+      saveData(data);
+
+      $('folderName').value = '';
+      render();
+      showToast('Folder created!', 'success');
+    };
+
+    $('addTopicBtn').onclick = () => {
+      const group = ($('groupName') ? $('groupName').value.trim() : '') || 'General';
+      const name = $('topicName').value.trim();
+      if (!name) {
+        showToast('Please enter a topic name', 'error');
+        return;
+      }
+
+      const data = loadData();
+      const folder = getActiveFolder(data);
+      if (!folder) { 
+        showToast('Pick a folder first', 'error');
+        return;
+      }
+
+      const newTopic = { id: uid(), group: group, name: name, items: [] };
+      folder.topics.push(newTopic);
+      data.activeTopicId = newTopic.id;
+      saveData(data);
+
+      $('topicName').value = '';
+      if ($('groupName')) $('groupName').value = '';
+      render();
+      showToast('Topic created!', 'success');
+    };
+
+    if ($('deleteTopicBtn')) {
+      $('deleteTopicBtn').onclick = () => deleteActiveTopic();
+    }
+
+    function fakeDelay(ms) {
+      return new Promise(res => setTimeout(res, ms));
+    }
+
+    function setStatus(el, show, text) {
+      el.textContent = text;
+      el.classList.toggle('show', show);
+    }
+
+    function showOutput(el, text) {
+      el.style.display = 'block';
+      el.textContent = text;
+    }
+
+    function saveItem(type, title, content) {
+      const selected = ensureSelectionOrWarn();
+      if (!selected) return false;
+
+      const data = selected.data;
+      const topic = selected.topic;
+
+      topic.items = topic.items || [];
+      topic.items.push({ type: type, title: title, content: content, ts: Date.now() });
+      saveData(data);
+      return true;
+    }
+
+function normalizePreview(s) {
+      return (s || "")
+        .replace(/[\n\t]+/g, " ")
+        .replace(/\s{2,}/g, " ")
+        .trim();
+    }
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function extractKeywords(text, max = 18) {
+  const stop = new Set([
+    'the','a','an','and','or','but','if','then','else','when','while','for','to','of','in','on','at','by','with','without','from','into','over','under',
+    'is','are','was','were','be','been','being','do','does','did','can','could','should','would','may','might','must','will','shall',
+    'this','that','these','those','it','its','they','them','their','you','your','we','our','i','me','my','as','than','also','such','not','no','yes',
+    'more','most','less','least','very','much','many','some','any','each','every'
+  ]);
+
+  const words = (text || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+    .filter(w => w.length >= 4 && w.length <= 20)
+    .filter(w => !stop.has(w));
+
+  const freq = new Map();
+  for (const w of words) freq.set(w, (freq.get(w) || 0) + 1);
+
+  return Array.from(freq.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([w]) => w)
+    .slice(0, max);
+}
+
+function findBestSentenceForTerm(text, term) {
+  const sents = (text || '')
+    .replace(/\r/g, '')
+    .split(/(?<=[.!?])\s+/)
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const termRe = new RegExp('\\b' + term.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&') + '\\b', 'i');
+  const hits = sents.filter(s => termRe.test(s));
+
+  hits.sort((a, b) => a.length - b.length);
+  return hits[0] || '';
+}
+
+function makeOfflineMCQs(text) {
+  const cleaned = (text || '').trim();
+  const terms = extractKeywords(cleaned, 20);
+
+  if (!terms.length) {
+    return [
+      'MCQ Set (offline mode)',
+      '',
+      'Could not detect enough keywords. Paste a longer lesson text.'
+    ].join('\n');
+  }
+
+  const letters = ['A','B','C','D'];
+  const used = new Set();
+  const questions = [];
+
+  for (const term of terms) {
+    if (questions.length >= 8) break;
+    if (used.has(term)) continue;
+    used.add(term);
+
+    const bestSent = findBestSentenceForTerm(cleaned, term);
+    const stem = bestSent
+      ? normalizePreview(bestSent).replace(new RegExp('\\b' + term + '\\b', 'ig'), '_____')
+      : '_____ is best described by which option?';
+
+    const distractors = terms.filter(t => t !== term).slice(0, 12);
+    const picked = shuffleArray(distractors).slice(0, 3);
+
+    const options = shuffleArray([term, ...picked]);
+    const correctIndex = options.indexOf(term);
+    const answerLetter = letters[correctIndex] || 'A';
+
+    const optsLines = options.map((opt, idx) => '   ' + letters[idx] + ') ' + opt);
+
+    questions.push([
+      (questions.length + 1) + ') Fill the blank:',
+      '   "' + stem + '"',
+      ...optsLines,
+      '   Answer: ' + answerLetter,
+      ''
+    ].join('\n'));
+  }
+
+  return ['MCQ Set (offline mode)', '', ...questions].join('\n');
+}
+
+    function extractQuestions(text) {
+      const lines = text.replace(/\r/g, '').split('\n').map(l => l.trim()).filter(Boolean);
+
+      const qs = [];
+      const qRe = /^(?:Q\s*\d+|\d+\s*[\.)]|•|\-)\s*(.+)$/i;
+
+      for (const line of lines) {
+        if (line.includes('?')) { qs.push(line); continue; }
+
+        const m = line.match(qRe);
+        if (m && m[1] && m[1].length > 6) {
+          const heady = /^(deliverables|rubric|requirements|instructions|overview|grading|submission|due date)\b/i;
+          if (!heady.test(m[1])) qs.push(m[1]);
+        }
+      }
+
+      const seen = new Set();
+      const out = [];
+      for (const q of qs) {
+        const key = q.toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push(q);
+      }
+      return out.slice(0, 12);
+    }
+
+    function extractKeyFacts(text) {
+      const facts = [];
+
+      const urls = Array.from(text.matchAll(/https?:\/\/[^\s)]+/g)).map(m => m[0]);
+      if (urls.length) facts.push('Links: ' + urls.slice(0, 2).join(' , '));
+
+      const emails = Array.from(text.matchAll(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi)).map(m => m[0]);
+      if (emails.length) facts.push('Email: ' + emails[0]);
+
+      const due = text.match(/\b(due\s*(date)?|deadline)\b\s*[:\-]?\s*([^\n]{0,60})/i);
+      if (due && due[3]) facts.push('Due: ' + normalizePreview(due[3]));
+
+      const wc = text.match(/\b(\d{2,5})\s*(words|word count)\b/i);
+      if (wc) facts.push('Word count: ' + wc[1] + ' ' + wc[2]);
+
+      return facts.slice(0, 6);
+    }
+
+    function assignmentBreakdownFromText(text) {
+      const qs = extractQuestions(text);
+      const facts = extractKeyFacts(text);
+      const preview = normalizePreview(text.slice(0, 220)) + (text.length > 220 ? '…' : '');
+
+      const out = [];
+      out.push('Assignment Breakdown (offline mode)');
+      out.push('');
+
+      out.push('1) What you need to do (plain English)');
+      out.push('- Turn the prompt into a checklist.');
+      out.push('- Answer every required question/rubric point using headings.');
+      out.push('- Submit in the required format.');
+      out.push('');
+
+      out.push('2) Deliverables checklist');
+      out.push('- [ ] Final written response with clear headings');
+      out.push('- [ ] Include required details (links/citations if asked)');
+      out.push('- [ ] Submit in the required format');
+      out.push('');
+
+      out.push('3) Quick facts detected');
+      if (facts.length) facts.forEach(f => out.push('- ' + f));
+      else out.push('- (No obvious due date/format/links detected — that’s okay.)');
+      out.push('');
+
+      out.push('4) Questions / prompts to answer');
+      if (qs.length) qs.forEach((q, i) => out.push((i + 1) + '. ' + q));
+      else out.push('1. (No clear questions detected — use rubric headings as section titles.)');
+      out.push('');
+
+      out.push('5) Suggested structure (copy/paste)');
+      if (qs.length) qs.forEach((q, i) => out.push('Section ' + (i + 1) + ': ' + q.replace(/\?+$/, '')));
+      else {
+        out.push('Section 1: Overview / Introduction');
+        out.push('Section 2: Main requirements');
+        out.push('Section 3: Evidence / examples');
+        out.push('Section 4: Conclusion');
+      }
+      out.push('');
+
+      out.push('Input preview: "' + preview + '"');
+      return out.join('\n');
+    }
+
+    $('explainBtn').onclick = async () => {
+      const selected = ensureSelectionOrWarn();
+      if (!selected) return;
+
+      const status = $('assignStatus');
+      const out = $('assignmentOutput');
+
+      setStatus(status, true, 'Analyzing…');
+      out.style.display = 'none';
+
+      await fakeDelay(900);
+
+      const file = $('assignmentFile').files[0];
+      const fileName = file ? file.name : 'assignment';
+
+      // Best input: dedicated assignment text box
+      const pastedAssign = ($('assignmentText') && $('assignmentText').value)
+        ? $('assignmentText').value.trim()
+        : '';
+
+      // Fallback: lecture box
+      const pastedLecture = ($('lectureText') && $('lectureText').value)
+        ? $('lectureText').value.trim()
+        : '';
+
+      const promptText = pastedAssign
+        ? ('Assignment instructions:\n' + pastedAssign)
+        : (pastedLecture
+            ? ('Assignment instructions (from Notes box):\n' + pastedLecture)
+            : ('Student uploaded file: ' + fileName + '. Provide a checklist + what to look for.'));
+
+      try {
+        const result = await callAI('assignment', promptText);
+
+        setStatus(status, false, '');
+        showOutput(out, result);
+
+        saveItem('Assignment', 'Explained: ' + fileName, result);
+        render();
+      } catch (err) {
+        setStatus(status, false, '');
+        showOutput(out, 'Error: ' + (err && err.message ? err.message : String(err)));
+      }
+    };
+
+
+    $('summarizeBtn').onclick = async () => {
+      const selected = ensureSelectionOrWarn();
+      if (!selected) return;
+
+      const status = $('sumStatus');
+      const out = $('sumOutput');
+
+      setStatus(status, true, 'Working…');
+      out.style.display = 'none';
+
+      await fakeDelay(600);
+
+      const text = $('lessonText').value.trim();
+
+      try {
+        const result = await callAI('summarize', text);
+        setStatus(status, false, '');
+        showOutput(out, result);
+        saveItem('Summary', 'Lesson summary', result);
+        render();
+      } catch (err) {
+        setStatus(status, false, '');
+        showOutput(out, 'Error: ' + (err && err.message ? err.message : String(err)));
+      }
+    };
+
+    $('mcqBtn').onclick = async () => {
+      const selected = ensureSelectionOrWarn();
+      if (!selected) return;
+
+      const status = $('mcqStatus');
+      const out = $('mcqOutput');
+
+      setStatus(status, true, 'Generating…');
+      out.style.display = 'none';
+
+      await fakeDelay(600);
+
+      const text = $('mcqText').value.trim();
+
+      try {
+        const result = await callAI('mcq', text);
+        setStatus(status, false, '');
+        showOutput(out, result);
+        saveItem('MCQ', 'MCQ set', result);
+        render();
+      } catch (err) {
+        setStatus(status, false, '');
+        showOutput(out, 'Error: ' + (err && err.message ? err.message : String(err)));
+      }
+    };
+
+    $('quizBtn').onclick = async () => {
+      const selected = ensureSelectionOrWarn();
+      if (!selected) return;
+
+      const status = $('quizStatus');
+      const out = $('quizOutput');
+
+      setStatus(status, true, 'Building quiz…');
+      out.style.display = 'none';
+
+      await fakeDelay(600);
+
+      const text = $('quizText').value.trim();
+
+      try {
+        const result = await callAI('quiz', text);
+        setStatus(status, false, '');
+        showOutput(out, result);
+        saveItem('Quiz', 'Short answer quiz', result);
+        render();
+      } catch (err) {
+        setStatus(status, false, '');
+        showOutput(out, 'Error: ' + (err && err.message ? err.message : String(err)));
+      }
+    };
+
+    $('popBtn').onclick = async () => {
+      const selected = ensureSelectionOrWarn();
+      if (!selected) return;
+
+      const status = $('popStatus');
+      const out = $('popOutput');
+
+      setStatus(status, true, 'Creating pop quiz…');
+      out.style.display = 'none';
+
+      await fakeDelay(600);
+
+      const text = $('popText').value.trim();
+
+      try {
+        const result = await callAI('pop', text);
+        setStatus(status, false, '');
+        showOutput(out, result);
+        saveItem('Pop Quiz', 'Fast recall', result);
+        render();
+      } catch (err) {
+        setStatus(status, false, '');
+        showOutput(out, 'Error: ' + (err && err.message ? err.message : String(err)));
+      }
+    };
+
+    $('notesBtn').onclick = async () => {
+      const selected = ensureSelectionOrWarn();
+      if (!selected) return;
+
+      const status = $('notesStatus');
+      const out = $('notesOutput');
+
+      setStatus(status, true, 'Summarizing…');
+      out.style.display = 'none';
+
+      await fakeDelay(900);
+
+      const text = $('lectureText').value.trim();
+
+      const result = await callAI('notes', text);
+
+      setStatus(status, false, '');
+      showOutput(out, result);
+
+      saveItem('Notes', 'Generated notes', result);
+      render();
+    };
+
+    $('refreshLibraryBtn').onclick = () => renderLibrary();
+
+    $('clearRecentBtn').onclick = () => {
+      setRecentClearedAt(Date.now());
+      renderRecent();
+    };
+
+    $('clearTopicBtn').onclick = () => {
+      const data = loadData();
+      const folder = getActiveFolder(data);
+      const topic = getActiveTopic(folder, data);
+      if (!folder || !topic) { alert('Select a folder and topic first.'); return; }
+
+      const ok = confirm('Clear all items in ' + folder.name + ' → ' + (topic.group || 'General') + ' → ' + topic.name + '?');
+      if (!ok) return;
+
+      topic.items = [];
+      saveData(data);
+      render();
+    };
+
+    $('resetBtn').onclick = () => {
+      const ok = confirm('Reset demo data? This will wipe folders/topics/items stored in this browser.');
+      if (!ok) return;
+      localStorage.removeItem(STORAGE_KEY);
+      render();
+    };
+
+    $('aiToggleBtn').onclick = () => {
+      // Offline always works. AI requires a Worker URL.
+      if (!AI_CONFIG.workerUrl) {
+        AI_CONFIG.enabled = false;
+        saveAIState();
+        setAIBadge();
+        alert('Offline Mode is enabled (works without internet).\n\nTo enable AI later, add your Worker URL into AI_CONFIG.workerUrl in the code.');
+        return;
+      }
+      AI_CONFIG.enabled = !AI_CONFIG.enabled;
+      saveAIState();
+      setAIBadge();
+    };
+    loadAIState();
+    render();
+    renderTabs();
+  </script>
+</body>
+</html>
